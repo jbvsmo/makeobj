@@ -1,0 +1,28 @@
+# This is a comment
+# Pokemon status problems
+
+@obj: StatusProblems =:
+
+    @keys =
+        'freeze'
+        'sleep'
+        'paralyze'
+        'poison'
+        'burn'
+        None
+
+    @attr: name == @keys
+
+    @attr: abrev = ['FRZ', 'SLP', 'PAR', 'PSN', 'BRN', '']
+
+    @attr: bonus = [2, 2, 1.5, 1.5, 1.5, 1]
+
+    @attr: damage =:
+        @default = 0.0
+        @set =>
+            'poison': 0.125
+            'burn': 0.125
+
+    @attr: walkloss =:
+        @default = False
+        @set => 'poison': True
