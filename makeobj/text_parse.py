@@ -97,7 +97,7 @@ def _parse(it):
             if not name:
                 name = prop #TODO this should not store the property
             if op != OP.eq:
-                if op != OP.obj:
+                if op != OP.obj: # There's not a sub object (new block)
                     val = ast.literal_eval(val if op == OP.py else '{%s}' % val)\
                     if val\
                     else _load_block(it, op)
