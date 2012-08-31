@@ -1,10 +1,12 @@
 # coding: utf-8
+from makeobj.obj import Obj
+
 __author__ = 'JB'
 
 class ParseError(Exception):
     pass
 
-properties = {'obj', 'key', 'attr', 'default', 'set', 'method'}
+properties = set(('obj', 'key', 'attr', 'default', 'set', 'method'))
 funcs = ['==', '=>', '=:', '=']
 
 class OP:
@@ -16,8 +18,8 @@ class OP:
     """
     eq, kv, obj, py = funcs
 
-class Info:
+class Info(Obj):
     """ Parsing status or content of element
     """
-    close, open, data, line, end = 'close', 'open', 'data', 'line', 'end'
-    #close, open, data, line, end = range(5)
+    _keys = 'close', 'open', 'data', 'line', 'end'
+    _attrs = {'line': None}
