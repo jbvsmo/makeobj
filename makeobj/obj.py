@@ -10,9 +10,11 @@ class MetaObj(type):
     _attr = {}      # Instance specific attributes
     _attrs = {}     # Attributes for all instances
     _methods = {}   # Methods set in the class
+    _names = set()  # Set made of keys after possible tuple unpacking
 
     def __init__(cls, *args, **kw):
         super(MetaObj, cls).__init__(*args, **kw)
+        metacls = type(cls)
 
         try:
             # See if cls._keys is made of key-value iterable
@@ -21,11 +23,11 @@ class MetaObj(type):
         except (ValueError, IndexError):
             enum = enumerate(cls._keys)
             # Get only the names in a set for fast check
-            cls._names = set(cls._keys)
+            metacls._names = set(cls._keys)
         else:
             enum = cls._keys
             # Get only the names in a set for fast check
-            cls._names = set(j for i,j in enum)
+            metacls._names = set(j for i,j in enum)
 
         for k,v in cls._methods.items():
             v.__name__ = k #just in case some lambdas reach here
@@ -34,15 +36,21 @@ class MetaObj(type):
         for i, name in enum:
             dic = cls._attr.get(name, {})
             dic.update(cls._attrs)
-            setattr(cls, name, cls._create(i, name, dic))
+            setattr(metacls, name, cls._create(i, name, dic))
+
+    def __dir__(cls):
+        """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
+            Also provide the _methods and _names attributes
+        """
+        return ['_methods', '_names'] + list(cls._names) + list(cls._methods)
 
     def __repr__(cls):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ' '.join(sorted(cls._names)))
 
     def _create(cls, val, name, attr):
         self = cls(name)
-        self._value = val
-        self._name = name
+        self._value = self.value = val
+        self._name = self.name = name
         for k,v in attr.items():
             setattr(self, k, v)
         return self
@@ -78,5 +86,6 @@ def make_object(name, keys, attr=None, methods=None, class_attr=None):
         class_attr = {}
 
     data = {'_keys': keys, '_attr': attr, '_methods': methods, '_attrs': class_attr}
-    return MetaObj(name, (Obj,), data)
+    meta = type('_SubMetaObj', (MetaObj,), data)
+    return meta(name, (Obj,), {})
 
