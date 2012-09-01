@@ -6,11 +6,11 @@
 """
 
 from makeobj.text_parse import _parse, _iter_parse
-from makeobj.obj import make_object, Obj
+from makeobj.obj import make_object
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('parse', 'make_object', 'Obj')
+__all__ = ('parse', 'make_object')
 
 
 def parse(text, upto=None):

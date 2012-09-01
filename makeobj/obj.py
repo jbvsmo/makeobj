@@ -3,17 +3,19 @@ __author__ = 'JB'
 __metaclass__ = type
 
 
-class MetaObj(type):
+class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
+
+        Do never create classes with this metaclass to avoid breaking it
     """
-    _keys = ()      # Objects in the enum
+    _keys = ()      # Objects in the enum in {Num:Name} format
     _attr = {}      # Instance specific attributes
     _attrs = {}     # Attributes for all instances
     _methods = {}   # Methods set in the class
-    _names = set()  # Set made of keys after possible tuple unpacking
+    _names = ()     # Keys after possible tuple unpacking
 
     def __init__(cls, *args, **kw):
-        super(MetaObj, cls).__init__(*args, **kw)
+        type.__init__(cls,  *args, **kw)
         metacls = type(cls)
 
         try:
@@ -28,12 +30,13 @@ class MetaObj(type):
             enum = cls._keys
             # Get only the names in a set for fast check
             metacls._names = set(j for i,j in enum)
+        metacls._keys = dict(enum)
 
         for k,v in cls._methods.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
 
-        for i, name in enum:
+        for i, name in metacls._keys.items():
             dic = cls._attr.get(name, {})
             dic.update(cls._attrs)
             setattr(metacls, name, cls._create(i, name, dic))
@@ -42,12 +45,17 @@ class MetaObj(type):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
             Also provide the _methods and _names attributes
         """
-        return ['_methods', '_names'] + list(cls._names) + list(cls._methods)
+        return ['_keys', '_methods', '_names'] + list(cls._names) + list(cls._methods)
 
     def __repr__(cls):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ' '.join(sorted(cls._names)))
 
     def _create(cls, val, name, attr):
+        """ Create instance from the class that will be set in the metaclass.
+            The `value` and `name` atrributes have counterparts with `_` to
+            allow these names to be overriten and still be available.
+            This function also set all the instance attributes.
+        """
         self = cls(name)
         self._value = self.value = val
         self._name = self.name = name
@@ -55,9 +63,11 @@ class MetaObj(type):
             setattr(self, k, v)
         return self
 
-class Obj:
+class __Obj:
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
+
+        Do never inherit from this class to avoid breaking it
     """
     def __new__(cls, key):
         if key in cls._names:
@@ -67,25 +77,32 @@ class Obj:
             return obj
         raise RuntimeError('Invalid name of object: %r' % key)
 
+    #noinspection PyUnusedLocal
+    def __init__(self, key):
+        pass
+
+    def __dir__(self):
+        return list(vars(self)) + list(type(self)._methods)
+
     def __repr__(self):
         return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Useful for direct subclassing Obj without `make_object`
-Obj = MetaObj('Obj', (Obj,), {})
+__Obj = __MetaObj('__Obj', (__Obj,), {})
 
 
-def make_object(name, keys, attr=None, methods=None, class_attr=None):
+def make_object(name, keys, attr=None, methods=None, common_attr=None):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
     """
     if attr is None:
         attr = {}
     if methods is None:
         methods = {}
-    if class_attr is None:
-        class_attr = {}
+    if common_attr is None:
+        common_attr = {}
 
-    data = {'_keys': keys, '_attr': attr, '_methods': methods, '_attrs': class_attr}
-    meta = type('_SubMetaObj', (MetaObj,), data)
-    return meta(name, (Obj,), {})
+    data = {'_keys': keys, '_attr': attr, '_methods': methods, '_attrs': common_attr}
+    meta = type('_SubMetaObj', (__MetaObj,), data)
+    return meta(name, (__Obj,), {})
 

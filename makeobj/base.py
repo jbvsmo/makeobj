@@ -1,5 +1,5 @@
 # coding: utf-8
-from makeobj.obj import Obj
+from makeobj.obj import make_object
 
 __author__ = 'JB'
 
@@ -18,8 +18,6 @@ class OP:
     """
     eq, kv, obj, py = funcs
 
-class Info(Obj):
-    """ Parsing status or content of element
-    """
-    _keys = 'close', 'open', 'data', 'line', 'end'
-    _attrs = {'line': None}
+
+# Parsing status or content of element
+Info = make_object('Info', ['close', 'open', 'data', 'line', 'end'], common_attr={'line': None})
