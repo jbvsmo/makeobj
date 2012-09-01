@@ -2,7 +2,6 @@
 __author__ = 'JB'
 __metaclass__ = type
 
-
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
 
@@ -45,7 +44,7 @@ class __MetaObj(type):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
             Also provide the _methods and _names attributes
         """
-        return ['_keys', '_methods', '_names'] + list(cls._names) + list(cls._methods)
+        return ['_keys', '_methods', '_names'] + list(cls.__dict__)
 
     def __repr__(cls):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ' '.join(sorted(cls._names)))
@@ -82,7 +81,7 @@ class __Obj:
         pass
 
     def __dir__(self):
-        return list(vars(self)) + list(type(self)._methods)
+        return list(self.__dict__) + list(type(self)._methods)
 
     def __repr__(self):
         return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
