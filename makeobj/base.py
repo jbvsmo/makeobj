@@ -2,11 +2,11 @@
 from makeobj.obj import make_object
 
 __author__ = 'JB'
+__metaclas__ = type
 
 class ParseError(Exception):
     pass
 
-properties = set(('obj', 'key', 'attr', 'default', 'set', 'method'))
 funcs = ['==', '=>', '=:', '=']
 
 class OP:
@@ -19,5 +19,23 @@ class OP:
     eq, kv, obj, py = funcs
 
 
-# Parsing status or content of element
-Info = make_object('Info', ['close', 'open', 'data', 'line', 'end'], common_attr={'line': None})
+doc = """ Parsing status or content of element """
+Info = make_object('Info', ['close', 'open', 'data', 'line', 'end'],
+                   common_attr={'line': None}, doc=doc)
+
+
+class PropObj:
+    """ Object to hold property elements
+    """
+    def __init__(self, mode, value):
+        self.mode = mode
+        self.value = value
+
+def prop_call(self, value):
+    """ Create a new PropObj with the call syntax for the prop object
+    """
+    return PropObj(self.name, value)
+
+doc = """ Possible properties for objects """
+Prop = make_object('Prop', ['obj', 'key', 'attr', 'default', 'set', 'method'],
+                   methods={'__call__': prop_call}, doc=doc)

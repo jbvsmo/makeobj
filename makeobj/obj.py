@@ -87,12 +87,31 @@ class __Obj:
         return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
-# Useful for direct subclassing Obj without `make_object`
+# Useful for direct subclassing Obj without `make_object`.
 __Obj = __MetaObj('__Obj', (__Obj,), {})
 
+def sample_dict():
+    """ Create the basic layout of attributes needed to create a new class.
+    """
+    return {'_keys': [], '_attr': {}, '_attrs': {}, '_methods': {}}
 
-def make_object(name, keys, attr=None, methods=None, common_attr=None):
+def make_object_from_dict(name, data):
+    """ Helper function to be used along with the `sample_dict` function.
+        For simpler usage, refer to the `make_object` function.
+    """
+    meta = type('_SubMetaObj', (__MetaObj,), data)
+    return meta(name, (__Obj,), {})
+
+def make_object(name, keys, attr=None, methods=None, common_attr=None, doc=''):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
+
+        name: The name of the resulting class.
+        keys: All the instances this class will have.
+        attr: Dictionary with attributes for each instance.
+              Example: {'inst1': {'a': 1}, 'inst2': {'a': 2}}
+        methods: Functions to be added to the class that will become instance methods.
+        common_attr: Attributes that have the same initial value to be added to all instances.
+        doc: Text to document class
     """
     if attr is None:
         attr = {}
@@ -101,7 +120,6 @@ def make_object(name, keys, attr=None, methods=None, common_attr=None):
     if common_attr is None:
         common_attr = {}
 
-    data = {'_keys': keys, '_attr': attr, '_methods': methods, '_attrs': common_attr}
-    meta = type('_SubMetaObj', (__MetaObj,), data)
-    return meta(name, (__Obj,), {})
-
+    data = {'_keys': keys, '_attr': attr, '_methods': methods,
+            '_attrs': common_attr, '__doc__': doc}
+    return make_object_from_dict(name, data)
