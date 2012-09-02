@@ -30,12 +30,14 @@ class PropObj:
     def __init__(self, mode, value):
         self.mode = mode
         self.value = value
+    def __repr__(self):
+        return '<{0.mode}: {0.value}>'.format(self)
 
 def prop_call(self, value):
     """ Create a new PropObj with the call syntax for the prop object
     """
-    return PropObj(self.name, value)
+    return PropObj(self, value)
 
 doc = """ Possible properties for objects """
-Prop = make_object('Prop', ['obj', 'key', 'attr', 'default', 'set', 'method'],
+Prop = make_object('Prop', ['obj', 'keys', 'attr', 'default', 'set', 'method', 'sub'],
                    methods={'__call__': prop_call}, doc=doc)
