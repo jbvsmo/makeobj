@@ -6,12 +6,13 @@
 """
 
 #noinspection PyUnresolvedReferences
+from makeobj.base import ParseError
 from makeobj.obj import make_object
 from makeobj.text_parse import _parse, _iter_parse, _build_all
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('parse', 'make_object')
+__all__ = ('parse', 'ParseError', 'make_object')
 
 
 def parse(text, upto=None):
@@ -25,7 +26,10 @@ def parse(text, upto=None):
         except AttributeError:
             pass # treat as an iterable of lines
 
-    return _build_all(_parse(_iter_parse(text, upto)))
+    objs = _build_all(_parse(_iter_parse(text, upto)))
+    if not objs:
+        raise ParseError('No object found!')
+    return objs[0] if len(objs) == 1 else objs
 
 
 if __name__ == '__main__':

@@ -162,7 +162,7 @@ def _build(name, obj, dic=None, keys=None):
 
     # METHOD
     elif obj.mode is Prop.method:
-        dic['_methods'][name] = lambda self: obj.value #FIXME
+        dic['_methods'][name] = lambda self: obj.value #TODO Fix lambdas state
 
     # ERROR!
     else:
