@@ -9,9 +9,9 @@
         'paralyze'
         'poison'
         'burn'
-        None
+        'ok'
 
-    @attr: name == @keys
+    #@attr: name == @keys
 
     @attr: abrev = ['FRZ', 'SLP', 'PAR', 'PSN', 'BRN', '']
 
@@ -26,3 +26,19 @@
     @attr: walkloss =:
         @default = False
         @set => 'poison': True
+
+    @sub: move =:
+            @attr: chance =:
+                @default = 1.0
+                @set =>
+                    'freeze': 0.0
+                    'paralyze': 0.5
+                    'sleep': 0.0
+
+            @attr: text_start =:
+                @default = "Add Text"
+
+            @attr: text_fail =:
+                @default = "Add Text"
+
+    @method: foo = 123
