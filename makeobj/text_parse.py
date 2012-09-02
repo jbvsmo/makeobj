@@ -2,7 +2,8 @@
 import ast
 import re
 import itertools
-from makeobj.base import funcs, ParseError, Info, OP
+from makeobj.base import funcs, ParseError, Info, OP, Prop
+from makeobj.obj import sample_dict, make_object_from_dict, MicroObj
 
 __author__ = 'JB'
 __metaclass__ = type
@@ -88,14 +89,15 @@ def _parse(it):
     """ Do the real recursive parsing that allow blocks inside blocks
         by running on top of `_iter_parse` iterator.
     """
-    data = []
+    data = {}
     for i,j in it:
         if j in (Info.close, Info.end):
             return data
         if j is Info.data:
             prop, name, op, val = i
+            prop = Prop(prop)
             if not name:
-                name = prop #TODO this should not store the property
+                name = '@' + prop.name
             if op != OP.eq:
                 if op != OP.obj: # There's not a sub object (new block)
                     val = ast.literal_eval(val if op == OP.py else '{%s}' % val)\
@@ -105,5 +107,64 @@ def _parse(it):
                     val = _parse(it)
             else:
                 pass # TODO missing the value conversion for OP.eq
-            data.append({name: val}) # TODO fix type of outputed blocks
+            data[name] = prop(val)
     return data
+
+
+def _build_all(data):
+    return [_build(*el) for el in data.items()]
+
+def _build(name, obj, dic=None, keys=None):
+    """ Parse dictionaries of `PropObj` elements
+    """
+    # OBJ
+    if obj.mode is Prop.obj:
+        dic = sample_dict()
+        data = obj.value
+        keys = dic['_keys'] = data.pop('@keys').value
+        for nm, val in data.items():
+            _build(nm, val, dic, keys)
+        #return {name: dic}
+        return make_object_from_dict(name, dic)
+
+    # SUB
+    elif obj.mode is Prop.sub:
+        sdic = sample_dict()
+        data = obj.value
+        is_micro_object = True
+        for nm, val in data.items():
+            _build(nm, val, sdic, keys)
+
+        for k in keys:
+            attr = sdic['_attrs']
+            attr.update(sdic['_methods'])
+            attr.update(sdic['_attr'].get(k, {}))
+
+            dic['_attr'].setdefault(k, {})[name] = MicroObj(attr)
+
+    # ATTR
+    elif obj.mode is Prop.attr:
+        if isinstance(obj.value, dict):
+            for v in obj.value.values():
+                _build(name, v, dic, keys)
+        else:
+            for k,v in zip(keys, obj.value):
+                dic['_attr'].setdefault(k, {})[name] = v
+
+    # SET
+    elif obj.mode is Prop.set:
+        for k,v in obj.value.items():
+            dic['_attr'].setdefault(k, {})[name] = v
+
+    # DEFAULT
+    elif obj.mode is Prop.default:
+        dic['_attrs'][name] = obj.value
+
+    # METHOD
+    elif obj.mode is Prop.method:
+        dic['_methods'][name] = lambda self: obj.value #FIXME
+
+    # ERROR!
+    else:
+        #print("ERROR", name, obj)
+        raise ParseError('Invalid Property', name)

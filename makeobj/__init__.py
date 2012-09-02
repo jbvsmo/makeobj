@@ -5,8 +5,9 @@
     License: BSD
 """
 
-from makeobj.text_parse import _parse, _iter_parse
+#noinspection PyUnresolvedReferences
 from makeobj.obj import make_object
+from makeobj.text_parse import _parse, _iter_parse, _build_all
 
 __author__ = 'JB'
 __metaclass__ = type
@@ -24,9 +25,10 @@ def parse(text, upto=None):
         except AttributeError:
             pass # treat as an iterable of lines
 
-    return _parse(_iter_parse(text, upto))
+    return _build_all(_parse(_iter_parse(text, upto)))
 
 
 if __name__ == '__main__':
-    print(parse(open('../tests/f1.makeobj')))
-    #print(parse(open(r'E:\Dropbox\dev\poke\mon\info\stats.makeobj')))
+    import pprint
+    pprint.pprint(parse(open('../tests/f1.makeobj')))
+    #pprint.pprint(parse(open(r'E:\Dropbox\dev\poke\mon\info\stats.makeobj')))
