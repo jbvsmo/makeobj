@@ -34,6 +34,7 @@ class __MetaObj(type):
         for k,v in cls._methods.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
+        metacls._methods = list(cls._methods)
 
         for i, name in metacls._keys.items():
             dic = {}
@@ -41,6 +42,8 @@ class __MetaObj(type):
             dic.update(cls._attr.get(name, {}))
 
             setattr(metacls, name, cls._create(i, name, dic))
+
+        del metacls._attr, metacls._attrs
 
     def __dir__(cls):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
@@ -77,10 +80,6 @@ class __Obj:
                 return object.__new__(cls)
             return obj
         raise RuntimeError('Invalid name of object: %r' % key)
-
-    #noinspection PyUnusedLocal
-    def __init__(self, key):
-        pass
 
     def __dir__(self):
         return list(self.__dict__) + list(type(self)._methods)
