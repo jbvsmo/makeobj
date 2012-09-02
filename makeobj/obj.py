@@ -36,18 +36,20 @@ class __MetaObj(type):
             setattr(cls, k, v)
 
         for i, name in metacls._keys.items():
-            dic = cls._attr.get(name, {})
+            dic = {}
             dic.update(cls._attrs)
+            dic.update(cls._attr.get(name, {}))
+
             setattr(metacls, name, cls._create(i, name, dic))
 
     def __dir__(cls):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
             Also provide the _methods and _names attributes
         """
-        return ['_keys', '_methods', '_names'] + list(cls.__dict__)
+        return list(cls.__dict__) + ['_keys', '_methods', '_names'] + list(cls._names)
 
     def __repr__(cls):
-        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ' '.join(sorted(cls._names)))
+        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
 
     def _create(cls, val, name, attr):
         """ Create instance from the class that will be set in the metaclass.
@@ -89,6 +91,17 @@ class __Obj:
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Useful for direct subclassing Obj without `make_object`.
 __Obj = __MetaObj('__Obj', (__Obj,), {})
+
+class MicroObj:
+    """ Small Objects to be used like a dictionary but with `getattr` syntax
+        instead of `getitem`.
+    """
+    def __init__(self, data=None):
+        if data is not None:
+            self.__dict__.update(data)
+
+    def __repr__(self):
+        return '<MicroObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
 
 def sample_dict():
     """ Create the basic layout of attributes needed to create a new class.
