@@ -7,7 +7,7 @@ class __MetaObj(type):
 
         Do never create classes with this metaclass to avoid breaking it
     """
-    _keys = ()      # Objects in the enum in {Num:Name} format
+    _keys = {}      # Objects in the enum in {Num:Name} format
     _attr = {}      # Instance specific attributes
     _attrs = {}     # Attributes for all instances
     _methods = {}   # Methods set in the class
@@ -20,18 +20,18 @@ class __MetaObj(type):
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
-            _, _ = cls._keys[0]
-        except (ValueError, IndexError):
-            enum = enumerate(cls._keys)
+            _, _ = metacls._keys[0]
+        except (ValueError, IndexError, KeyError):
+            enum = enumerate(metacls._keys)
             # Get only the names in a set for fast check
             metacls._names = set(cls._keys)
         else:
-            enum = cls._keys
+            enum = metacls._keys
             # Get only the names in a set for fast check
             metacls._names = set(j for i,j in enum)
         metacls._keys = dict(enum)
 
-        for k,v in cls._methods.items():
+        for k,v in metacls._methods.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
         metacls._methods = list(cls._methods)
