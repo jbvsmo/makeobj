@@ -136,7 +136,8 @@ def _build(name, obj, dic=None, keys=None):
             _build(nm, val, sdic, keys)
 
         for k in keys:
-            attr = sdic['_attrs']
+            attr = {}
+            attr.update(sdic['_attrs'])
             attr.update(sdic['_methods'])
             attr.update(sdic['_attr'].get(k, {}))
 
@@ -162,7 +163,7 @@ def _build(name, obj, dic=None, keys=None):
 
     # METHOD
     elif obj.mode is Prop.method:
-        dic['_methods'][name] = lambda self: obj.value #TODO Fix lambdas state
+        dic['_methods'][name] = lambda self, *args, **kw: obj.value #TODO Fix lambdas state
 
     # ERROR!
     else:
