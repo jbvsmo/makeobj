@@ -15,35 +15,43 @@ class __MetaObj(type):
 
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
-        metacls = type(cls)
+        mcs = type(cls) #metaclass
 
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
-            _, _ = metacls._keys[0]
-        except (ValueError, IndexError, KeyError):
-            enum = enumerate(metacls._keys)
-            # Get only the names in a set for fast check
-            metacls._names = set(cls._keys)
-        else:
-            enum = metacls._keys
-            # Get only the names in a set for fast check
-            metacls._names = set(j for i,j in enum)
-        metacls._keys = dict(enum)
+            _, _ = mcs._keys[0]
+            try:
+                _, _ = next(iter(mcs._attr))
+            except (ValueError, IndexError, KeyError):
+                pass
+            else:
+                # The attributes came in (num, name) format
+                mcs._attr = dict((k, v) for (i,k),v in mcs._attr.items())
 
-        for k,v in metacls._methods.items():
+        except (ValueError, IndexError, KeyError):
+            enum = enumerate(mcs._keys)
+            # Get only the names in a set for fast check
+            mcs._names = set(cls._keys)
+        else:
+            enum = mcs._keys
+            # Get only the names in a set for fast check
+            mcs._names = set(j for i,j in enum)
+        mcs._keys = dict(enum)
+
+        for k,v in mcs._methods.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
-        metacls._methods = list(cls._methods)
+        mcs._methods = list(cls._methods)
 
-        for i, name in metacls._keys.items():
+        for i, name in mcs._keys.items():
             dic = {}
             dic.update(cls._attrs)
             dic.update(cls._attr.get(name, {}))
 
-            setattr(metacls, name, cls._create(i, name, dic))
+            setattr(mcs, name, cls._create(i, name, dic))
 
-        del metacls._attr, metacls._attrs
+        del mcs._attr, mcs._attrs
 
     def __dir__(cls):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
@@ -129,6 +137,9 @@ def make(name, keys, methods=None, common_attr=None, doc=''):
               It may be a list or a dictionary with attributes for each instance.
               Example: ['inst1', 'inst2', 'inst3']
               Example: {'inst1': {'a': 1}, 'inst2': {'a': 2}}
+              Also, the instances may be two item tuples with (value, name)
+              Example: [(0, 'inst1'), (2, 'inst2'), (4, 'inst3')]
+              Example: {(0, 'inst1'): {'a': 1}, (2, 'inst2'): {'a': 2}}
         methods: Functions to be added to the class that will become instance methods.
         common_attr: Attributes that have the same initial value to be added to all instances.
         doc: Text to document class
