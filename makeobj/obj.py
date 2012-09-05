@@ -96,7 +96,6 @@ class __Obj:
         return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
-# Useful for direct subclassing Obj without `make_object`.
 __Obj = __MetaObj('__Obj', (__Obj,), {})
 
 class MicroObj:
@@ -117,7 +116,7 @@ def sample_dict():
 
 def make_object_from_dict(name, data):
     """ Helper function to be used along with the `sample_dict` function.
-        For simpler usage, refer to the `make_object` function.
+        For simpler usage, refer to the `make` function.
     """
     meta = type('_SubMetaObj', (__MetaObj,), data)
     return meta(name, (__Obj,), {})
