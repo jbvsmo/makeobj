@@ -131,7 +131,6 @@ def _build(name, obj, dic=None, keys=None):
     elif obj.mode is Prop.sub:
         sdic = sample_dict()
         data = obj.value
-        is_micro_object = True
         for nm, val in data.items():
             _build(nm, val, sdic, keys)
 
@@ -163,7 +162,7 @@ def _build(name, obj, dic=None, keys=None):
 
     # METHOD
     elif obj.mode is Prop.method:
-        dic['_methods'][name] = lambda self, *args, **kw: obj.value #TODO Fix lambdas state
+        dic['_methods'][name] = lambda self=None, *args, **kw: obj.value #TODO Fix lambdas state
 
     # ERROR!
     else:
