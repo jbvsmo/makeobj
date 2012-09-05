@@ -7,12 +7,12 @@
 
 #noinspection PyUnresolvedReferences
 from makeobj.base import ParseError
-from makeobj.obj import make_object
+from makeobj.obj import make
 from makeobj.text_parse import _parse, _iter_parse, _build_all
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('parse', 'ParseError', 'make_object')
+__all__ = ('parse', 'ParseError', 'make')
 
 
 def parse(text, upto=None):

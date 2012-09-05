@@ -1,5 +1,5 @@
 # coding: utf-8
-from makeobj.obj import make_object
+from makeobj.obj import make
 
 __author__ = 'JB'
 __metaclas__ = type
@@ -20,8 +20,8 @@ class OP:
 
 
 doc = """ Parsing status or content of element """
-Info = make_object('Info', ['close', 'open', 'data', 'line', 'end'],
-                   common_attr={'line': None}, doc=doc)
+Info = make('Info', ['close', 'open', 'data', 'line', 'end'],
+            common_attr={'line': None}, doc=doc)
 
 
 class PropObj:
@@ -39,5 +39,5 @@ def prop_call(self, value):
     return PropObj(self, value)
 
 doc = """ Possible properties for objects """
-Prop = make_object('Prop', ['obj', 'keys', 'attr', 'default', 'set', 'method', 'sub'],
-                   methods={'__call__': prop_call}, doc=doc)
+Prop = make('Prop', ['obj', 'keys', 'attr', 'default', 'set', 'method', 'sub'],
+            methods={'__call__': prop_call}, doc=doc)

@@ -119,19 +119,22 @@ def make_object_from_dict(name, data):
     meta = type('_SubMetaObj', (__MetaObj,), data)
     return meta(name, (__Obj,), {})
 
-def make_object(name, keys, attr=None, methods=None, common_attr=None, doc=''):
+def make(name, keys, methods=None, common_attr=None, doc=''):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
 
         name: The name of the resulting class.
         keys: All the instances this class will have.
-        attr: Dictionary with attributes for each instance.
+              It may be a list or a dictionary with attributes for each instance.
+              Example: ['inst1', 'inst2', 'inst3']
               Example: {'inst1': {'a': 1}, 'inst2': {'a': 2}}
         methods: Functions to be added to the class that will become instance methods.
         common_attr: Attributes that have the same initial value to be added to all instances.
         doc: Text to document class
     """
-    if attr is None:
-        attr = {}
+    attr = {}
+    if isinstance(keys, dict):
+        attr = keys
+        keys = list(keys)
     if methods is None:
         methods = {}
     if common_attr is None:
