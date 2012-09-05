@@ -54,6 +54,11 @@ class __MetaObj(type):
     def __repr__(cls):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
 
+    def _repr_pretty_(cls, p, cycle):
+        """ IPython 0.13+ friendly representation for classes.
+        """
+        p.text(repr(cls))
+
     def _create(cls, val, name, attr):
         """ Create instance from the class that will be set in the metaclass.
             The `value` and `name` atrributes have counterparts with `_` to
