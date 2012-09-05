@@ -13,7 +13,7 @@ This module is compatible with Python versions 2.6+ and 3.0+
 Using it
 ========
 
-MakeObj lets you create these enum with a simple language like that:
+MakeObj lets you create enumerations with a simple language like that:
 
 ```python
 @obj: RGBColors =:
@@ -56,8 +56,8 @@ Status
 ======
 
 This project is in its early stages and some issues are expected mainly in
-the parsing stage. It still not show all the errors and may load an invalid file skipping
-some data when it should raise an error.
+the parsing language. It still don't show all the errors and may load an invalid
+file skipping some data when it should raise an error.
 
 The `make` function works fine but it is still a little hard to add attributes and
 methods to each object (that's why there's the Enum Language).
@@ -75,7 +75,7 @@ Features
  * The elements come with two attributes by default: `name` and `value` (also `_name` and `_value`
    in case you want to override them).
  * Elements can (and should!) be checked with the `is` comparison and can be retrieved by name in string
-   form or value from their class: `RGBColors('red')` or `RGBColors[0]` or `RGBColors.red` returns the
+   form or value from their class: `RGBColors('red')` or `RGBColors[0]` or `RGBColors.red` result in the
    same object.
 
 

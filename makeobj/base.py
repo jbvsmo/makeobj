@@ -2,7 +2,7 @@
 from makeobj.obj import make
 
 __author__ = 'JB'
-__metaclas__ = type
+__metaclass__ = type
 
 class ParseError(Exception):
     pass
