@@ -54,6 +54,9 @@ class __MetaObj(type):
     def __repr__(cls):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
 
+    def __getitem__(cls, value):
+        return cls(cls._keys[value])
+
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
         """
