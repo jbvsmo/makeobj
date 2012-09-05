@@ -1,0 +1,23 @@
+#
+# Test many levels of `sub` objects
+#
+
+@obj: A =:
+
+    @keys = 'a', 'b', 'c'
+
+    @attr: a0 = 'aaa'
+    @method: m0 = 0
+
+    @sub: x =:
+        @attr: a2 = 'ccc'
+        @method: m1 = 1
+        @sub: y =:
+            @attr: a4 = 'eee'
+            @method: m2 = 2
+            @sub: z =:
+                @attr: a6 = 'ggg'
+                @method: m3 = 3
+            @attr: a5 = 'fff'
+        @attr: a3 = 'ddd'
+    @attr: a1 = 'bbb'
