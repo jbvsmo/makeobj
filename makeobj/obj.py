@@ -4,14 +4,23 @@ __metaclass__ = type
 
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
-
-        Do never create classes with this metaclass to avoid breaking it
     """
     _keys = {}      # Objects in the enum in {Num:Name} format
     _attr = {}      # Instance specific attributes
     _attrs = {}     # Attributes for all instances
-    _methods = {}   # Methods set in the class
+    _meth = {}      # Mapping of methods to be set
+    _methods = []   # Names of methods set in the class
     _names = ()     # Keys after possible tuple unpacking
+
+    def __new__(mcs, name, bases, dic):
+        """ A new metaclass (subclass of all bases!) is built and then created a new
+            class to be later instantiated.
+
+            Do never use this metaclass directly. Inherit from the `Obj` class instead
+        """
+        mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), dic)
+        return type.__new__(mcs, name, bases, {})
+
 
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
@@ -39,7 +48,7 @@ class __MetaObj(type):
             mcs._names = set(j for i,j in enum)
         mcs._keys = dict(enum)
 
-        for k,v in mcs._methods.items():
+        for k,v in mcs._meth.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
         mcs._methods = list(cls._methods)
@@ -51,7 +60,10 @@ class __MetaObj(type):
 
             setattr(mcs, name, cls._create(i, name, dic))
 
-        del mcs._attr, mcs._attrs
+        mcs._attr.clear()
+        mcs._attrs.clear()
+        mcs._meth.clear()
+
 
     def __dir__(cls):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
@@ -83,19 +95,19 @@ class __MetaObj(type):
             setattr(self, k, v)
         return self
 
-class __Obj:
+class Obj:
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
-
-        Do never inherit from this class to avoid breaking it
     """
     def __new__(cls, key):
-        if key in cls._names:
-            obj = getattr(cls, key, None)
-            if obj is None:
-                return object.__new__(cls)
-            return obj
-        raise RuntimeError('Invalid name of object: %r' % key)
+        obj = getattr(cls, key, None)
+        if obj is None:
+            if key in cls._names:
+                obj = object.__new__(cls)
+            else:
+                raise RuntimeError('Invalid name of object: %r' % key)
+        return obj
+
 
     def __dir__(self):
         return list(self.__dict__) + list(type(self)._methods)
@@ -104,7 +116,8 @@ class __Obj:
         return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
-__Obj = __MetaObj('__Obj', (__Obj,), {})
+# Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
+Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
 class MicroObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax
@@ -120,14 +133,13 @@ class MicroObj:
 def sample_dict():
     """ Create the basic layout of attributes needed to create a new class.
     """
-    return {'_keys': [], '_attr': {}, '_attrs': {}, '_methods': {}}
+    return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
 
 def make_object_from_dict(name, data):
     """ Helper function to be used along with the `sample_dict` function.
         For simpler usage, refer to the `make` function.
     """
-    meta = type('_SubMetaObj', (__MetaObj,), data)
-    return meta(name, (__Obj,), {})
+    return __MetaObj(name, (Obj,), data)
 
 def make(name, keys, methods=None, common_attr=None, doc=''):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
@@ -153,6 +165,6 @@ def make(name, keys, methods=None, common_attr=None, doc=''):
     if common_attr is None:
         common_attr = {}
 
-    data = {'_keys': keys, '_attr': attr, '_methods': methods,
+    data = {'_keys': keys, '_attr': attr, '_meth': methods,
             '_attrs': common_attr, '__doc__': doc}
     return make_object_from_dict(name, data)
