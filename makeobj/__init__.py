@@ -34,6 +34,4 @@ def parse(text, upto=None):
 
 
 if __name__ == '__main__':
-    import pprint
-    pprint.pprint(parse(open('../tests/f1.makeobj')))
-    #pprint.pprint(parse(open(r'E:\Dropbox\dev\poke\mon\info\stats.makeobj')))
+    pass

@@ -104,7 +104,7 @@ def _parse(it):
                     if val\
                     else _load_block(it, op)
                 else:
-                    val = _parse(it)
+                    val = _parse(it) if not val else itertools.repeat(ast.literal_eval(val))
             else:
                 pass # TODO missing the value conversion for OP.eq
             data[name] = prop(val)
