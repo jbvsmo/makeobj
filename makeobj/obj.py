@@ -4,6 +4,8 @@ __metaclass__ = type
 
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
+
+        Do never use this metaclass directly. Inherit from the `Obj` class instead
     """
     _keys = {}      # Objects in the enum in {Num:Name} format
     _attr = {}      # Instance specific attributes
@@ -15,8 +17,6 @@ class __MetaObj(type):
     def __new__(mcs, name, bases, dic):
         """ A new metaclass (subclass of all bases!) is built and then created a new
             class to be later instantiated.
-
-            Do never use this metaclass directly. Inherit from the `Obj` class instead
         """
         mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), dic)
         return type.__new__(mcs, name, bases, {})
