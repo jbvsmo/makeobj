@@ -1,0 +1,12 @@
+#
+# Operator `obj` with @default behavior when there's no block below
+# Expectation: x == y for every element
+#
+
+@obj: NoBlock =:
+
+    @keys = 'a', 'b', 'c'
+
+    @attr: x =: 1
+
+    @attr: y = 1, 1, 1

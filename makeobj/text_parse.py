@@ -141,7 +141,7 @@ def _build(name, obj, dic=None, keys=None):
         for k in keys:
             attr = {}
             attr.update(sdic['_attrs'])
-            attr.update(sdic['_methods'])
+            attr.update(sdic['_meth'])
             attr.update(sdic['_attr'].get(k, {}))
 
             dic['_attr'].setdefault(k, {})[name] = MicroObj(attr)
@@ -166,7 +166,7 @@ def _build(name, obj, dic=None, keys=None):
 
     # METHOD
     elif obj.mode is Prop.method:
-        dic['_methods'][name] = lambda self=None, *args, **kw: obj.value #TODO Fix lambdas state
+        dic['_meth'][name] = lambda self=None, *args, **kw: obj.value #TODO Fix lambdas state
 
     # ERROR!
     else:
