@@ -21,7 +21,6 @@ class __MetaObj(type):
         mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), dic)
         return type.__new__(mcs, name, bases, {})
 
-
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
         mcs = type(cls) #metaclass
@@ -29,10 +28,11 @@ class __MetaObj(type):
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
+            mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
             try:
                 _, _ = next(iter(mcs._attr))
-            except (ValueError, IndexError, KeyError):
+            except StopIteration:
                 pass
             else:
                 # The attributes came in (num, name) format
@@ -141,7 +141,7 @@ def make_object_from_dict(name, data):
     """
     return __MetaObj(name, (Obj,), data)
 
-def make(name, keys, methods=None, common_attr=None, doc=''):
+def make(name, keys, order=None, methods=None, common_attr=None, doc=''):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
 
         name: The name of the resulting class.
@@ -152,6 +152,9 @@ def make(name, keys, methods=None, common_attr=None, doc=''):
               Also, the instances may be two item tuples with (value, name)
               Example: [(0, 'inst1'), (2, 'inst2'), (4, 'inst3')]
               Example: {(0, 'inst1'): {'a': 1}, (2, 'inst2'): {'a': 2}}
+        order: When `keys` is a dictionary and the numbers are not specified, this argument
+               can be used with the elements in the right order a function to sort the keys
+               appropriately.
         methods: Functions to be added to the class that will become instance methods.
         common_attr: Attributes that have the same initial value to be added to all instances.
         doc: Text to document class
@@ -159,7 +162,13 @@ def make(name, keys, methods=None, common_attr=None, doc=''):
     attr = {}
     if isinstance(keys, dict):
         attr = keys
-        keys = list(keys)
+        if order:
+            if hasattr(order, '__call__'):
+                keys = order(keys)
+            else:
+                keys = order
+        else:
+            keys = list(keys)
     if methods is None:
         methods = {}
     if common_attr is None:
