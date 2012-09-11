@@ -25,6 +25,8 @@ class __MetaObj(type):
         type.__init__(cls,  *args, **kw)
         mcs = type(cls) #metaclass
 
+        cls.__doc__ = mcs.__doc__
+
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
