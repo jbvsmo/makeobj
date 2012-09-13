@@ -56,3 +56,43 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(z.b.f2(5), 6)
         self.assertTupleEqual(z.c.f3(1, 2, 3), (1, 2, 3))
 
+    def test_build_class_simple(self):
+        class X(o.Obj):
+            _keys = 'a', 'b'
+            _attr = {'a': {'x': 1, 'y': 2},
+                     'b': {'x': 2}}
+            _attrs = {'y': 0}
+
+        self.assertEqual(X.a.value, 0)
+        self.assertEqual(X.b.value, 1)
+        self.assertEqual(X.a.x, 1)
+        self.assertEqual(X.b.x, 2)
+        self.assertEqual(X.a.y, 2)
+        self.assertEqual(X.b.y, 0)
+
+    def test_build_class_complex(self):
+        class X(o.Obj):
+            _keys = (1, 'a'), (3, 'b')
+            _attr = {'a': {'x': 1},
+                     'b': {'x': 2}}
+
+        class Y(o.Obj):
+            _keys = (1, 'a'), (3, 'b')
+            _attr = {(1, 'a'): {'x': 1},
+                     (3, 'b'): {'x': 2}}
+
+        class Z(o.Obj):
+            _keys = (1, 'a'), (3, 'b')
+            _attr = {(0, 'a'): {'x': 1},
+                     (0, 'b'): {'x': 2}}
+
+        self.assertEqual(X.a.value, 1)
+        self.assertEqual(X.b.value, 3)
+        self.assertEqual(Y.a.value, 1)
+        self.assertEqual(Y.b.value, 3)
+        self.assertEqual(Z.a.value, 1)
+        self.assertEqual(Z.b.value, 3)
+
+        self.assertEqual(X.a.x, 1)
+        self.assertEqual(Y.b.x, 2)
+        self.assertEqual(Z.a.x, 1)
