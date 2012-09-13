@@ -32,19 +32,20 @@ class __MetaObj(type):
             # To allow the values to be chosen differently from range(X)
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
-            try:
-                _, _ = next(iter(mcs._attr))
-            except StopIteration:
-                pass
-            else:
-                # The attributes came in (num, name) format
-                mcs._attr = dict((k, v) for (i,k),v in mcs._attr.items())
-
-        except (ValueError, IndexError, KeyError):
+        except (ValueError, TypeError, IndexError, KeyError):
             enum = enumerate(mcs._keys)
             # Get only the names in a set for fast check
             mcs._names = set(cls._keys)
         else:
+            try:
+                # Check if the attributes *also* came in (num, name) format
+                _, _ = next(iter(mcs._attr))
+            except (ValueError, TypeError, StopIteration) as e:
+                pass
+            else:
+                # Remove the first element of the dict key
+                mcs._attr = dict((k, v) for (i, k), v in mcs._attr.items())
+
             enum = mcs._keys
             # Get only the names in a set for fast check
             mcs._names = set(j for i,j in enum)
