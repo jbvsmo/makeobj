@@ -16,7 +16,7 @@ class __MetaObj(type):
 
     # Generated upon initialization.
     _methods = []   # Names of methods set in the class
-    _names = ()     # Keys after possible tuple unpacking
+    _names = set()  # Keys after possible tuple unpacking
 
     def __new__(mcs, name, bases, dic):
         """ A new metaclass (subclass of all bases!) is built and then created a new
@@ -59,7 +59,7 @@ class __MetaObj(type):
         for k,v in mcs._meth.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
-        mcs._methods = list(mcs._meth)
+        mcs._methods = sorted(mcs._meth)
 
         for i, name in mcs._keys.items():
             dic = {}

@@ -52,9 +52,10 @@ class ObjTest(unittest.TestCase):
 
     def test_methods(self):
         z = self.z
+        self.assertEqual(z._methods, ['f1', 'f2', 'f3'])
         self.assertEqual(z.a.f1(), 'a')
         self.assertEqual(z.b.f2(5), 6)
-        self.assertTupleEqual(z.c.f3(1, 2, 3), (1, 2, 3))
+        self.assertEqual(z.c.f3(1, 2, 3), (1, 2, 3))
 
     def test_build_class_simple(self):
         class X(o.Obj):
