@@ -7,10 +7,14 @@ class __MetaObj(type):
 
         Do never use this metaclass directly. Inherit from the `Obj` class instead
     """
+
+    # Provided by the user. Only _keys is kept after transformation.
     _keys = {}      # Objects in the enum in {Num:Name} format
     _attr = {}      # Instance specific attributes
     _attrs = {}     # Attributes for all instances
     _meth = {}      # Mapping of methods to be set
+
+    # Generated upon initialization.
     _methods = []   # Names of methods set in the class
     _names = ()     # Keys after possible tuple unpacking
 
@@ -40,7 +44,7 @@ class __MetaObj(type):
             try:
                 # Check if the attributes *also* came in (num, name) format
                 _, _ = next(iter(mcs._attr))
-            except (ValueError, TypeError, StopIteration) as e:
+            except (ValueError, TypeError, StopIteration):
                 pass
             else:
                 # Remove the first element of the dict key
@@ -49,12 +53,13 @@ class __MetaObj(type):
             enum = mcs._keys
             # Get only the names in a set for fast check
             mcs._names = set(j for i,j in enum)
+
         mcs._keys = dict(enum)
 
         for k,v in mcs._meth.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
-        mcs._methods = list(cls._methods)
+        mcs._methods = list(mcs._meth)
 
         for i, name in mcs._keys.items():
             dic = {}
@@ -63,14 +68,15 @@ class __MetaObj(type):
 
             setattr(mcs, name, cls._create(i, name, dic))
 
-        mcs._attr.clear()
-        mcs._attrs.clear()
-        mcs._meth.clear()
-
+        for name in ['_attr', '_attrs', '_meth']:
+            if name in mcs.__dict__:
+                # Will not erase `__MetaObj` references as the __init__ will never be
+                # called when instantiating its only class `Obj`.
+                delattr(mcs, name)
 
     def __dir__(cls):
         """ Provide the members and methods names as metaclass attributes aren't shown by `dir`
-            Also provide the _methods and _names attributes
+            Also provide the _methods and _names attributes.
         """
         return list(cls.__dict__) + ['_keys', '_methods', '_names'] + list(cls._names)
 
@@ -111,7 +117,6 @@ class Obj:
                 raise RuntimeError('Invalid name of object: %r' % key)
         return obj
 
-
     def __dir__(self):
         return list(self.__dict__) + list(type(self)._methods)
 
@@ -144,7 +149,7 @@ def make_object_from_dict(name, data):
     """
     return __MetaObj(name, (Obj,), data)
 
-def make(name, keys, order=None, methods=None, common_attr=None, doc=''):
+def make(name, keys, order=None, methods=None, common_attr=None, doc=None):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
 
         name: The name of the resulting class.
