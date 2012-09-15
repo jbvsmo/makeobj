@@ -127,7 +127,7 @@ class Obj:
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
-class MicroObj:
+class SubObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
     """
@@ -136,7 +136,7 @@ class MicroObj:
             self.__dict__.update(data)
 
     def __repr__(self):
-        return '<MicroObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
+        return '<SubObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
 
 def sample_dict():
     """ Create the basic layout of attributes needed to create a new class.

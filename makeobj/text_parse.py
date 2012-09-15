@@ -3,7 +3,7 @@ import ast
 import re
 import itertools
 from makeobj.base import funcs, ParseError, Info, OP, Prop
-from makeobj.obj import sample_dict, make_object_from_dict, MicroObj
+from makeobj.obj import sample_dict, make_object_from_dict, SubObj
 
 __author__ = 'JB'
 __metaclass__ = type
@@ -144,7 +144,7 @@ def _build(name, obj, dic=None, keys=None):
             attr.update(sdic['_meth'])
             attr.update(sdic['_attr'].get(k, {}))
 
-            dic['_attr'].setdefault(k, {})[name] = MicroObj(attr)
+            dic['_attr'].setdefault(k, {})[name] = SubObj(attr)
 
     # ATTR
     elif obj.mode is Prop.attr:
