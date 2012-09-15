@@ -2,6 +2,14 @@
 __author__ = 'JB'
 __metaclass__ = type
 
+
+def sample_dict():
+    """ Create the basic layout of attributes needed to create a new class.
+    """
+    return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
+
+sample = sample_dict()
+
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
 
@@ -22,8 +30,12 @@ class __MetaObj(type):
         """ A new metaclass (subclass of all bases!) is built and then created a new
             class to be later instantiated.
         """
-        mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), dic)
-        return type.__new__(mcs, name, bases, {})
+        # Add to metaclass only the right attributes.
+        keys = [k for k in dic if k in sample]
+        mcs_dic = dict((k, dic.pop(k)) for k in keys)
+
+        mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), mcs_dic)
+        return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
@@ -115,6 +127,8 @@ class Obj:
                 obj = object.__new__(cls)
             else:
                 raise RuntimeError('Invalid name of object: %r' % key)
+        elif not isinstance(obj, cls):
+            raise RuntimeError('Class attribute cannot have the same name as instances: %s' % key)
         return obj
 
     def __dir__(self):
@@ -138,18 +152,13 @@ class SubObj:
     def __repr__(self):
         return '<SubObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
 
-def sample_dict():
-    """ Create the basic layout of attributes needed to create a new class.
-    """
-    return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
-
 def make_object_from_dict(name, data):
     """ Helper function to be used along with the `sample_dict` function.
         For simpler usage, refer to the `make` function.
     """
     return __MetaObj(name, (Obj,), data)
 
-def make(name, keys, order=None, methods=None, common_attr=None, doc=None):
+def make(name, keys, order=None, methods=None, common_attr=None, doc=None, extra=None, **kw):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
 
         name: The name of the resulting class.
@@ -166,6 +175,9 @@ def make(name, keys, order=None, methods=None, common_attr=None, doc=None):
         methods: Functions to be added to the class that will become instance methods.
         common_attr: Attributes that have the same initial value to be added to all instances.
         doc: Text to document class
+        extra: Other attributes to be added to the class. Useful when a name is taken by
+               an argument.
+        kw: Other attributes to be added to the class.
     """
     attr = {}
     if isinstance(keys, dict):
@@ -184,4 +196,7 @@ def make(name, keys, order=None, methods=None, common_attr=None, doc=None):
 
     data = {'_keys': keys, '_attr': attr, '_meth': methods,
             '_attrs': common_attr, '__doc__': doc}
+    if extra:
+        data.update(extra)
+    data.update(kw)
     return make_object_from_dict(name, data)
