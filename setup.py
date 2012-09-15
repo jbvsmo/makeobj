@@ -12,7 +12,7 @@ setup(
     author_email = 'jbvsmo@example.com',
     description = 'Powerful Enumeration System',
     classifiers = [
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
