@@ -41,8 +41,8 @@ class __MetaObj(type):
         type.__init__(cls,  *args, **kw)
         mcs = type(cls) #metaclass
 
-        cls.__doc__ = mcs.__doc__
-
+        if not mcs.__dict__.get('_keys'):
+            mcs._keys = () #Nothing to instantiate
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
@@ -79,6 +79,8 @@ class __MetaObj(type):
             dic.update(cls._attr.get(name, {}))
 
             setattr(mcs, name, cls._create(i, name, dic))
+
+        mcs._names.update(*(base._names for base in mcs.__bases__))
 
         for name in ['_attr', '_attrs', '_meth']:
             if name in mcs.__dict__:

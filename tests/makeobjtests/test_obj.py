@@ -97,3 +97,20 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(X.a.x, 1)
         self.assertEqual(Y.b.x, 2)
         self.assertEqual(Z.a.x, 1)
+
+    def test_subclass(self):
+        class X(o.Obj):
+            _keys = 'a', 'b'
+            test = 1
+
+        class Y(X):
+            pass
+
+        class Z(Y):
+            _keys = 'c',
+
+        self.assertEqual(X._names, Y._names)
+        self.assertEqual(X._names.union('c'), Z._names)
+        self.assertEqual(X.a, Y.a)
+        self.assertEqual(Y.b, Z.b)
+        self.assertEqual(X.test, Z.test)
