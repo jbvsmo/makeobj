@@ -30,7 +30,7 @@ def _iter_parse(text, upto=None):
         Also split the information of block opening lines.
     """
     increase_indent = False
-    indent_history = [0]
+    indent_history = []
     for cnt, line in enumerate(text, 1):
         if upto is not None and upto == cnt:
             break
@@ -38,6 +38,10 @@ def _iter_parse(text, upto=None):
         i, line = _indent(line)
         if not line or line.startswith('#'):
             continue
+
+        if not indent_history:
+            # The first indentation level is the smallest acceptable.
+            indent_history.append(i)
 
         old = indent_history[-1]
         if i < old:

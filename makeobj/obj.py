@@ -66,14 +66,17 @@ class __MetaObj(type):
             # Get only the names in a set for fast check
             mcs._names = set(j for i,j in enum)
 
-        mcs._keys = dict(enum)
-
         for k,v in mcs._meth.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
         mcs._methods = sorted(mcs._meth)
 
-        for i, name in mcs._keys.items():
+        mcs._keys = {}
+        for i,name in enum:
+            if i in mcs._keys:
+                raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
+            mcs._keys[i] = name
+
             dic = {}
             dic.update(cls._attrs)
             dic.update(cls._attr.get(name, {}))
@@ -98,7 +101,15 @@ class __MetaObj(type):
         return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
 
     def __getitem__(cls, value):
-        return cls(cls._keys[value])
+        """ Get the enum element by its value. It performs checks on parent classes
+            as well.
+        """
+        try:
+            return cls(cls._keys[value])
+        except KeyError:
+            for c in cls.mro():
+                if value in c._keys:
+                    return c[value]
 
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.

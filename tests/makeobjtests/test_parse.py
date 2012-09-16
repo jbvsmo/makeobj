@@ -59,3 +59,18 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(A.a.y, n)
         self.assertEqual(A.b.y, n)
         self.assertEqual(A.c.y, n)
+
+    def test_multiline_strings(self):
+        # This multiline string starts at an indentation level
+        # bigger than 0. This should be accepted!
+        t = '''
+        @obj: A =:
+            @keys = 'a', 'b', 'c'
+            @attr: x =: 1
+        '''
+
+        A = makeobj.parse(t)
+        self.assertEqual(A.__name__, 'A')
+        self.assertEqual(A.a.value, 0)
+        self.assertEqual(A.b.x, 1)
+        self.assertEqual(A.c.name, 'c')

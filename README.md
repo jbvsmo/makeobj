@@ -2,7 +2,7 @@ MakeObj - Powerful Enumeration System
 =====================================
 
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
-* Version:   0.2
+* Version:   0.3
 * GitHub:    <https://github.com/jbvsmo/makeobj>
 
 MakeObj is a module to help create powerful enumeration classes with support
@@ -86,5 +86,5 @@ TODO
  * Change the `@method` property to allow better function/method support
  * Create a helper function to load a directory of `.makeobj` files as they
    were a python module.
- * Create a `MicroObj` interface like the `make` function.
  * Limit the values of enumeration (probably only hashable types)
+ * Better suport on subclassing.
