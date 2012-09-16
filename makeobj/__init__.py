@@ -14,7 +14,7 @@ __author__ = 'JB'
 __metaclass__ = type
 __all__ = ('parse', 'ParseError', 'make')
 
-version = '0.3'
+version = '0.4'
 
 def parse(text, upto=None):
     """ Parse a block of text in makeobj format and create a list of elements
