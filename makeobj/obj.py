@@ -66,14 +66,17 @@ class __MetaObj(type):
             # Get only the names in a set for fast check
             mcs._names = set(j for i,j in enum)
 
-        mcs._keys = dict(enum)
-
         for k,v in mcs._meth.items():
             v.__name__ = k #just in case some lambdas reach here
             setattr(cls, k, v)
         mcs._methods = sorted(mcs._meth)
 
-        for i, name in mcs._keys.items():
+        mcs._keys = {}
+        for i,name in enum:
+            if i in mcs._keys:
+                raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
+            mcs._keys[i] = name
+
             dic = {}
             dic.update(cls._attrs)
             dic.update(cls._attr.get(name, {}))

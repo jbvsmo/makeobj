@@ -114,3 +114,7 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(X.a, Y.a)
         self.assertEqual(Y.b, Z.b)
         self.assertEqual(X.test, Z.test)
+
+    def test_repeated_value(self):
+        f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
+        self.assertRaises(RuntimeError, f)
