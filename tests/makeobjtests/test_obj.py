@@ -98,7 +98,14 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(Y.b.x, 2)
         self.assertEqual(Z.a.x, 1)
 
-    def test_subclass(self):
+
+    def test_repeated_value(self):
+        f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
+        self.assertRaises(RuntimeError, f)
+
+
+class ObjTestSubclass(unittest.TestCase):
+    def setUp(self):
         class X(o.Obj):
             _keys = 'a', 'b'
             test = 1
@@ -107,7 +114,18 @@ class ObjTest(unittest.TestCase):
             pass
 
         class Z(Y):
-            _keys = 'c',
+            _keys = (2, 'c'),
+
+        class W(Z):
+            _keys = (3, 'd'),
+
+        self.x = X
+        self.y = Y
+        self.z = Z
+        self.w = W
+
+    def test_subclass_simple(self):
+        X, Y, Z = self.x, self.y, self.z
 
         self.assertEqual(X._names, Y._names)
         self.assertEqual(X._names.union('c'), Z._names)
@@ -115,6 +133,12 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(Y.b, Z.b)
         self.assertEqual(X.test, Z.test)
 
-    def test_repeated_value(self):
-        f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
-        self.assertRaises(RuntimeError, f)
+    def test_subclass_getitem(self):
+        X, Y, Z, W = self.x, self.y, self.z, self.w
+
+        self.assertEqual(X[0], Y[0])
+        self.assertEqual(Y[1], Z[1])
+        self.assertEqual(Z[0], X[0])
+        self.assertEqual(Z[0], X[0])
+        self.assertEqual(Z[2], W[2])
+        self.assertEqual(W[1], X[1])
