@@ -78,7 +78,7 @@ class __MetaObj(type):
 
         mcs._keys = {}
         for i, name in enum:
-            if i in mcs._keys:
+            if mcs._check_key(i):
                 raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
             mcs._keys[i] = name
 
@@ -122,6 +122,19 @@ class __MetaObj(type):
         if cycle:
             pass
         p.text(repr(cls))
+
+    @classmethod
+    def _check_key(mcs, key):
+        """ Verify the existence of a certain key on a metaclass and
+            its bases.
+        """
+        __MetaObj = globals()['__MetaObj']
+
+        if key in mcs._keys:
+            return True
+
+        bases = [base for base in mcs.__bases__ if issubclass(base, __MetaObj)]
+        return any(base._check_key(key) for base in bases)
 
     def _create(cls, val, name, attr):
         """ Create instance from the class that will be set in the metaclass.
@@ -174,7 +187,6 @@ class Obj:
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
-
 
 class SubObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax
