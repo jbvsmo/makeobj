@@ -41,7 +41,7 @@ class __MetaObj(type):
         return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
-        type.__init__(cls,  *args, **kw)
+        type.__init__(cls, *args, **kw)
         mcs = type(cls)  # metaclass
 
         if not mcs.__dict__.get('_keys'):
@@ -69,15 +69,15 @@ class __MetaObj(type):
 
             enum = mcs._keys
             # Get only the names in a set for fast check
-            mcs._names = set(j for i,j in enum)
+            mcs._names = set(j for i, j in enum)
 
-        for k,v in mcs._meth.items():
-            v.__name__ = k #just in case some lambdas reach here
+        for k, v in mcs._meth.items():
+            v.__name__ = k  # just in case some lambdas reach here
             setattr(cls, k, v)
         mcs._methods = sorted(mcs._meth)
 
         mcs._keys = {}
-        for i,name in enum:
+        for i, name in enum:
             if i in mcs._keys:
                 raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
             mcs._keys[i] = name
@@ -140,7 +140,7 @@ class __MetaObj(type):
                                % (name, parent, cls_.__name__))
         self._value = self.value = val
         self._name = self.name = name
-        for k,v in attr.items():
+        for k, v in attr.items():
             setattr(self, k, v)
         return self
 
@@ -161,6 +161,9 @@ class Obj:
             raise RuntimeError('Class attribute cannot have the same name'
                                'as instances: %r' % key)
         return obj
+
+    def __init__(self, key):
+        pass
 
     def __dir__(self):
         return list(self.__dict__) + list(type(self)._methods)
