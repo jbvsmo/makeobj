@@ -1,4 +1,6 @@
 # coding: utf-8
+from makeobj import tools
+
 __author__ = 'JB'
 __metaclass__ = type
 
@@ -9,6 +11,7 @@ def sample_dict():
     return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
 
 sample = sample_dict()
+
 
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
@@ -39,17 +42,19 @@ class __MetaObj(type):
 
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
-        mcs = type(cls) #metaclass
+        mcs = type(cls)  # metaclass
 
         if not mcs.__dict__.get('_keys'):
-            mcs._keys = () #Nothing to instantiate
+            mcs._keys = ()  # Nothing to instantiate
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            enum = enumerate(mcs._keys)
+            start = tools.max_(tools.max_(base._keys) for base in mcs.__bases__)
+            start = 0 if start is None else start + 1
+            enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
             mcs._names = set(cls._keys)
         else:
@@ -114,6 +119,8 @@ class __MetaObj(type):
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
         """
+        if cycle:
+            pass
         p.text(repr(cls))
 
     def _create(cls, val, name, attr):
@@ -122,12 +129,21 @@ class __MetaObj(type):
             allow these names to be overriten and still be available.
             This function also set all the instance attributes.
         """
+        # Avoid adding twice the name in the same class
+        error = hasattr(cls, name)
+
         self = cls(name)
+        if error or not isinstance(self, cls):
+            cls_ = type(self)
+            parent = 'parent ' if cls != type(self) else ''
+            raise RuntimeError('Name %r already on %sclass %r'
+                               % (name, parent, cls_.__name__))
         self._value = self.value = val
         self._name = self.name = name
         for k,v in attr.items():
             setattr(self, k, v)
         return self
+
 
 class Obj:
     """ Base class without metaclass because of python 2.x/3.x
@@ -140,8 +156,10 @@ class Obj:
                 obj = object.__new__(cls)
             else:
                 raise RuntimeError('Invalid name of object: %r' % key)
-        elif not isinstance(obj, cls):
-            raise RuntimeError('Class attribute cannot have the same name as instances: %s' % key)
+        elif not issubclass(cls, type(obj)):
+            # Only allow instances of this class or parent classes.
+            raise RuntimeError('Class attribute cannot have the same name'
+                               'as instances: %r' % key)
         return obj
 
     def __dir__(self):
@@ -154,6 +172,7 @@ class Obj:
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
+
 class SubObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
@@ -165,11 +184,13 @@ class SubObj:
     def __repr__(self):
         return '<SubObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
 
+
 def make_object_from_dict(name, data):
     """ Helper function to be used along with the `sample_dict` function.
         For simpler usage, refer to the `make` function.
     """
     return __MetaObj(name, (Obj,), data)
+
 
 def make(name, keys, order=None, methods=None, common_attr=None, doc=None, extra=None, **kw):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
