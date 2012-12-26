@@ -15,5 +15,6 @@ v3 = sys.version_info[0] == 3
 
 if not v3:
     zip = itertools.izip
-else:
-    zip = _btn.zip
+    filter = itertools.ifilter
+    map = itertools.imap
+    range = xrange
