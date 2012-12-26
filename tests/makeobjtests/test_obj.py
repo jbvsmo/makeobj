@@ -104,6 +104,7 @@ class ObjTest(unittest.TestCase):
 
 
 class ObjTestSubclass(unittest.TestCase):
+
     def setUp(self):
         class X(o.Obj):
             _keys = 'a', 'b'
@@ -118,13 +119,30 @@ class ObjTestSubclass(unittest.TestCase):
         class W(Z):
             _keys = (3, 'd'),
 
-        self.x = X
-        self.y = Y
-        self.z = Z
-        self.w = W
+        class X1(X):
+            _keys = 'c',
+
+        class X2(X1):
+            _keys = 'd', 'e'
+
+        self.cls = X, Y, Z, W, X1, X2
+
+    def test_subclass_values(self):
+        X, Y, Z, W, X1, X2 = self.cls
+
+        self.assertEqual(X.a, X[0])
+        self.assertEqual(Y.b.value, 1)
+        self.assertEqual(Z.c, Z[2])
+        self.assertEqual(W.d.value, 3)
+
+        self.assertEqual(X2.a, X2[0])
+        self.assertEqual(X1.b.value, 1)
+        self.assertEqual(X1.c, X1[2])
+        self.assertEqual(X2.d.value, 3)
+        self.assertEqual(X2.e, X2[4])
 
     def test_subclass_simple(self):
-        X, Y, Z = self.x, self.y, self.z
+        X, Y, Z = self.cls[:3]
 
         self.assertEqual(X._names, Y._names)
         self.assertEqual(X._names.union('c'), Z._names)
@@ -133,7 +151,7 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(X.test, Z.test)
 
     def test_subclass_get_item(self):
-        X, Y, Z, W = self.x, self.y, self.z, self.w
+        X, Y, Z, W = self.cls[:4]
 
         self.assertEqual(X[0], Y[0])
         self.assertEqual(Y[1], Z[1])
@@ -143,7 +161,7 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(W[1], X[1])
 
     def test_subclass_get_instance(self):
-        X, Y, Z, W = self.x, self.y, self.z, self.w
+        X, Y, Z, W = self.cls[:4]
 
         self.assertEqual(X('a'), Y('a'))
         self.assertEqual(Y('b'), Z('b'))
@@ -153,3 +171,14 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertRaises(RuntimeError, W, 'test')
         self.assertRaises(RuntimeError, Y, 'invalid-name')
         self.assertRaises(RuntimeError, Z, 'invalid-name')
+
+    def test_subclass_repeated(self):
+        X = self.cls[0]
+
+        # Cannot repeat key from parent
+        self. assertRaises(RuntimeError, type, 'SubX', (X,),
+                           {'_keys': ['a', 'z']})
+
+        # Cannot repeat key from this same class
+        self. assertRaises(RuntimeError, type, 'SubX', (X,),
+                           {'_keys': ['z', 'z']})

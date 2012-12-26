@@ -1,4 +1,6 @@
 # coding: utf-8
+from makeobj import tools
+
 __author__ = 'JB'
 __metaclass__ = type
 
@@ -50,7 +52,9 @@ class __MetaObj(type):
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            enum = enumerate(mcs._keys)
+            start = tools.max_(tools.max_(base._keys) for base in mcs.__bases__)
+            start = 0 if start is None else start + 1
+            enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
             mcs._names = set(cls._keys)
         else:
@@ -125,7 +129,15 @@ class __MetaObj(type):
             allow these names to be overriten and still be available.
             This function also set all the instance attributes.
         """
+        # Avoid adding twice the name in the same class
+        error = hasattr(cls, name)
+
         self = cls(name)
+        if error or not isinstance(self, cls):
+            cls_ = type(self)
+            parent = 'parent ' if cls != type(self) else ''
+            raise RuntimeError('Name %r already on %sclass %r'
+                               % (name, parent, cls_.__name__))
         self._value = self.value = val
         self._name = self.name = name
         for k,v in attr.items():
@@ -146,7 +158,8 @@ class Obj:
                 raise RuntimeError('Invalid name of object: %r' % key)
         elif not issubclass(cls, type(obj)):
             # Only allow instances of this class or parent classes.
-            raise RuntimeError('Class attribute cannot have the same name as instances: %r' % key)
+            raise RuntimeError('Class attribute cannot have the same name'
+                               'as instances: %r' % key)
         return obj
 
     def __dir__(self):
