@@ -98,7 +98,6 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(Y.b.x, 2)
         self.assertEqual(Z.a.x, 1)
 
-
     def test_repeated_value(self):
         f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
         self.assertRaises(RuntimeError, f)
@@ -133,7 +132,7 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(Y.b, Z.b)
         self.assertEqual(X.test, Z.test)
 
-    def test_subclass_getitem(self):
+    def test_subclass_get_item(self):
         X, Y, Z, W = self.x, self.y, self.z, self.w
 
         self.assertEqual(X[0], Y[0])
@@ -142,3 +141,15 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(Z[0], X[0])
         self.assertEqual(Z[2], W[2])
         self.assertEqual(W[1], X[1])
+
+    def test_subclass_get_instance(self):
+        X, Y, Z, W = self.x, self.y, self.z, self.w
+
+        self.assertEqual(X('a'), Y('a'))
+        self.assertEqual(Y('b'), Z('b'))
+        self.assertEqual(Z('c'), W('c'))
+
+        self.assertRaises(RuntimeError, X, 'test')
+        self.assertRaises(RuntimeError, W, 'test')
+        self.assertRaises(RuntimeError, Y, 'invalid-name')
+        self.assertRaises(RuntimeError, Z, 'invalid-name')

@@ -10,6 +10,7 @@ def sample_dict():
 
 sample = sample_dict()
 
+
 class __MetaObj(type):
     """ Metaclass for adding attributes and methods on the fly
 
@@ -39,10 +40,10 @@ class __MetaObj(type):
 
     def __init__(cls, *args, **kw):
         type.__init__(cls,  *args, **kw)
-        mcs = type(cls) #metaclass
+        mcs = type(cls)  # metaclass
 
         if not mcs.__dict__.get('_keys'):
-            mcs._keys = () #Nothing to instantiate
+            mcs._keys = ()  # Nothing to instantiate
         try:
             # See if cls._keys is made of key-value iterable
             # To allow the values to be chosen differently from range(X)
@@ -114,6 +115,8 @@ class __MetaObj(type):
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
         """
+        if cycle:
+            pass
         p.text(repr(cls))
 
     def _create(cls, val, name, attr):
@@ -129,6 +132,7 @@ class __MetaObj(type):
             setattr(self, k, v)
         return self
 
+
 class Obj:
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
@@ -140,8 +144,9 @@ class Obj:
                 obj = object.__new__(cls)
             else:
                 raise RuntimeError('Invalid name of object: %r' % key)
-        elif not isinstance(obj, cls):
-            raise RuntimeError('Class attribute cannot have the same name as instances: %s' % key)
+        elif not issubclass(cls, type(obj)):
+            # Only allow instances of this class or parent classes.
+            raise RuntimeError('Class attribute cannot have the same name as instances: %r' % key)
         return obj
 
     def __dir__(self):
@@ -154,6 +159,7 @@ class Obj:
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
+
 class SubObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
@@ -165,11 +171,13 @@ class SubObj:
     def __repr__(self):
         return '<SubObj: [{0}]>'.format(', '.join(sorted(self.__dict__)))
 
+
 def make_object_from_dict(name, data):
     """ Helper function to be used along with the `sample_dict` function.
         For simpler usage, refer to the `make` function.
     """
     return __MetaObj(name, (Obj,), data)
+
 
 def make(name, keys, order=None, methods=None, common_attr=None, doc=None, extra=None, **kw):
     """ Create a subclass of `Obj` with chosen elements, attributes and methods.
