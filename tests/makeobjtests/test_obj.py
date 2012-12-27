@@ -1,5 +1,7 @@
 # coding: utf-8
 import unittest
+from makeobj.helper import class_attr, attr, keys
+from makeobj.even_flow import *
 import makeobj.obj as o
 
 __author__ = 'JB'
@@ -107,23 +109,27 @@ class ObjTestSubclass(unittest.TestCase):
 
     def setUp(self):
         class X(o.Obj):
-            _keys = 'a', 'b'
-            test = 1
+            a, b = keys(2)
+            n1 = class_attr(1)
+            n2 = attr(10)
 
         class Y(X):
             pass
 
         class Z(Y):
-            _keys = (2, 'c'),
+            c = 2
+
+            def f(self):
+                return self.value + 1
 
         class W(Z):
             _keys = (3, 'd'),
 
         class X1(X):
-            _keys = 'c',
+            c = keys(1)
 
         class X2(X1):
-            _keys = 'd', 'e'
+            d, e = keys(2)
 
         self.cls = X, Y, Z, W, X1, X2
 
@@ -148,7 +154,7 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(X._names.union('c'), Z._names)
         self.assertEqual(X.a, Y.a)
         self.assertEqual(Y.b, Z.b)
-        self.assertEqual(X.test, Z.test)
+        self.assertEqual(X.n1, Z.n1)
 
     def test_subclass_get_item(self):
         X, Y, Z, W = self.cls[:4]
@@ -182,3 +188,13 @@ class ObjTestSubclass(unittest.TestCase):
         # Cannot repeat key from this same class
         self. assertRaises(RuntimeError, type, 'SubX', (X,),
                            {'_keys': ['z', 'z']})
+
+    def test_method(self):
+        X, Y, Z = self.cls[:3]
+
+        if v3:
+            # Methods bound to classes will not work (old Py2k behavior)
+            self.assertEqual(Z.f(Z.a), Z.a.value + 1)
+            self.assertEqual(Z.f(Z.b), Z.b.value + 1)
+
+        self.assertEqual(Z.c.f(), Z.c.value + 1)
