@@ -2,7 +2,7 @@ MakeObj - Powerful Enumeration System
 =====================================
 
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
-* Version:   0.4
+* Version:   0.5
 * GitHub:    <https://github.com/jbvsmo/makeobj>
 
 MakeObj is a module to help create powerful enumeration classes with support
@@ -44,26 +44,25 @@ If you have simple enums, you can use like this:
 RGBColors = makeobj.make('RGBColors', ['red', 'green', 'blue'])
 ```
 
-or, with some more data:
+or, with some more data, one may want to write a class:
 
 ```python
-RGBColors = makeobj.make('RGBColors', {'red': {'hex': 'ff0000'},
-                                       'green': {'hex': '00ff00'},
-                                       'blue': {'hex': '0000ff'}})
+class RGBColors(Obj):
+    red, green, blue = keys(3)
+    hex = attr('ff0000', '00ff00', '0000ff')
+
 ```
 
 Status
 ======
 
-This project is in its early stages and some issues are expected mainly in
-the parsing language. It still don't show all the errors and may load an invalid
+This project is in test stage and some issues are expected mainly in the parsing language.
+It will parse conformant code, but still may not show all the errors and may load an invalid
 file skipping some data when it should raise an error.
 
-The `make` function works fine but it is still a little hard to add attributes and
-methods to each object (that's why there's the Enum Language).
-
-It is already possible to directly subclass the `Obj` class, but some functionalities
-from the Enum language are still being added.
+The `make` function works fine but it may be easier to write a class instead. The
+`SubObj` machinery (see the `tests/files` directory for examples) only works in
+the Enum Language. Yet!
 
 
 Features
@@ -80,7 +79,8 @@ Features
  * Elements can (and should!) be checked with the `is` comparison and can be retrieved by name in string
    form or value from their class: `RGBColors('red')` or `RGBColors[0]` or `RGBColors.red` result in the
    same object.
-
+ * Enum values must be integer for simplicity and to help usability.
+ * Subclassing is great!
 
 TODO
 ====
@@ -89,5 +89,4 @@ TODO
  * Change the `@method` property to allow better function/method support
  * Create a helper function to load a directory of `.makeobj` files as they
    were a python module.
- * Limit the values of enumeration (probably only hashable types)
- * Better suport on subclassing.
+ * Better suport on subclassing: multiple inheritance, parent default attributes

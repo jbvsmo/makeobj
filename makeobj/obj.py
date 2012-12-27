@@ -1,8 +1,10 @@
 # coding: utf-8
-from makeobj import tools
+from makeobj import tools, helper
+from makeobj import obj_fix
 
 __author__ = 'JB'
 __metaclass__ = type
+__all__ = ('make', 'Obj')
 
 
 def sample_dict():
@@ -33,6 +35,10 @@ class __MetaObj(type):
         """ A new metaclass (subclass of all bases!) is built and then created a new
             class to be later instantiated.
         """
+        # Make a `sample_dict` conformant dictionary
+        # Useful when using helper.Special stuff
+        dic = obj_fix.fix_dict(dic)
+
         # Add to metaclass only the right attributes.
         keys = [k for k in dic if k in sample]
         mcs_dic = dict((k, dic.pop(k)) for k in keys)
@@ -41,7 +47,7 @@ class __MetaObj(type):
         return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
-        type.__init__(cls,  *args, **kw)
+        type.__init__(cls, *args, **kw)
         mcs = type(cls)  # metaclass
 
         if not mcs.__dict__.get('_keys'):
@@ -52,7 +58,8 @@ class __MetaObj(type):
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            start = tools.max_(tools.max_(base._keys) for base in mcs.__bases__)
+            start = tools.max_(tools.max_(base._keys, default=-1) for base in mcs._get_bases())
+            #print(args[0], start)
             start = 0 if start is None else start + 1
             enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
@@ -69,16 +76,19 @@ class __MetaObj(type):
 
             enum = mcs._keys
             # Get only the names in a set for fast check
-            mcs._names = set(j for i,j in enum)
+            mcs._names = set(j for i, j in enum)
 
-        for k,v in mcs._meth.items():
-            v.__name__ = k #just in case some lambdas reach here
+        for k, v in mcs._meth.items():
+            v.__name__ = k  # just in case some lambdas reach here
             setattr(cls, k, v)
         mcs._methods = sorted(mcs._meth)
 
         mcs._keys = {}
-        for i,name in enum:
-            if i in mcs._keys:
+        for i, name in enum:
+            if not isinstance(i, helper.ALLOWED_ENUM_TYPES):
+                raise TypeError('Enumeration values must be of types %r'
+                                % helper.ALLOWED_ENUM_TYPES)
+            if mcs._check_key(i):
                 raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
             mcs._keys[i] = name
 
@@ -88,7 +98,7 @@ class __MetaObj(type):
 
             setattr(mcs, name, cls._create(i, name, dic))
 
-        mcs._names.update(*(base._names for base in mcs.__bases__))
+        mcs._names.update(*(base._names for base in mcs._get_bases()))
 
         for name in ['_attr', '_attrs', '_meth']:
             if name in mcs.__dict__:
@@ -123,6 +133,25 @@ class __MetaObj(type):
             pass
         p.text(repr(cls))
 
+    @classmethod
+    def _get_bases(mcs):
+        """ Get all base classes up to __MetaObj from mro and remove self
+        """
+        __MetaObj = globals()['__MetaObj']
+        return [base for base in mcs.__mro__[1:] if issubclass(base, __MetaObj)]
+
+    @classmethod
+    def _check_key(mcs, key):
+        """ Verify the existence of a certain key on a metaclass and
+            its bases.
+        """
+
+        if key in mcs._keys:
+            return True
+
+        bases = mcs._get_bases()
+        return any(key in base._keys for base in bases)
+
     def _create(cls, val, name, attr):
         """ Create instance from the class that will be set in the metaclass.
             The `value` and `name` atrributes have counterparts with `_` to
@@ -140,7 +169,7 @@ class __MetaObj(type):
                                % (name, parent, cls_.__name__))
         self._value = self.value = val
         self._name = self.name = name
-        for k,v in attr.items():
+        for k, v in attr.items():
             setattr(self, k, v)
         return self
 
@@ -162,6 +191,9 @@ class Obj:
                                'as instances: %r' % key)
         return obj
 
+    def __init__(self, key):
+        pass
+
     def __dir__(self):
         return list(self.__dict__) + list(type(self)._methods)
 
@@ -171,7 +203,6 @@ class Obj:
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
-
 
 class SubObj:
     """ Small Objects to be used like a dictionary but with `getattr` syntax

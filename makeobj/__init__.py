@@ -6,15 +6,18 @@
 """
 
 #noinspection PyUnresolvedReferences
+from makeobj.obj import make, Obj
+from makeobj.helper import attr, class_attr, keys
 from makeobj.base import ParseError
-from makeobj.obj import make
 from makeobj.text_parse import _parse, _iter_parse, _build_all
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('parse', 'ParseError', 'make')
+__all__ = ('parse', 'ParseError', 'make', 'Obj',
+           'attr', 'class_attr', 'keys',)
 
-version = '0.4'
+version = '0.5'
+
 
 def parse(text, upto=None):
     """ Parse a block of text in makeobj format and create a list of elements

@@ -19,3 +19,19 @@ class ToolsTest(unittest.TestCase):
 
         self.assertEqual(t.max_([], key=abs, default=True), True)
         self.assertEqual(t.min_([], key=abs, default=True), True)
+
+    def test_iter_items(self):
+
+        def it(*args, **kw):
+            return list(t.iter_items(*args, **kw))
+
+        x = (1, 2, 3, 4)
+        y = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+
+        final = sorted(y.items())
+
+        self.assertEqual(it(x, 'abcd'), final)
+        self.assertEqual(it(x, 'abc'), final[:-1])
+
+        self.assertEqual(it(y, 'abcd'), final)
+        self.assertEqual(it(y, 'abc'), final[:-1])
