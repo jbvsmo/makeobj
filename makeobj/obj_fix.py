@@ -1,8 +1,8 @@
 # coding: utf-8
 import collections
 import types
-from makeobj.helper import Modes, Special, ALLOWED_ENUM_TYPES
-from makeobj.even_flow import *
+from .helper import Modes, Special, ALLOWED_ENUM_TYPES
+from .even_flow import *
 
 __author__ = 'JB'
 

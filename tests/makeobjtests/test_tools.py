@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import unittest
-import makeobj.tools as t
+from makeobj import tools as t
 
 __author__ = 'JB'
 

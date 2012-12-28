@@ -1,6 +1,6 @@
 # coding: utf-8
-from makeobj import tools, helper
-from makeobj import obj_fix
+from . import tools, helper
+from . import obj_fix
 
 __author__ = 'JB'
 __metaclass__ = type

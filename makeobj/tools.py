@@ -1,6 +1,6 @@
 # coding: utf-8
 import collections
-from makeobj.even_flow import *
+from .even_flow import *
 
 __author__ = 'JB'
 

@@ -2,8 +2,8 @@
 import ast
 import re
 import itertools
-from makeobj.base import funcs, ParseError, Info, OP, Prop
-from makeobj.obj import sample_dict, make_object_from_dict, SubObj
+from .text_parse_base import funcs, ParseError, Info, OP, Prop
+from .obj import sample_dict, make_object_from_dict, SubObj
 
 __author__ = 'JB'
 __metaclass__ = type

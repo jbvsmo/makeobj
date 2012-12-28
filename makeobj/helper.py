@@ -1,5 +1,5 @@
 # coding: utf-8
-from makeobj.even_flow import *
+from .even_flow import *
 
 __author__ = 'JB'
 __all__ = ('attr', 'class_attr', 'keys')

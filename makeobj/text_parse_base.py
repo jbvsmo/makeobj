@@ -1,5 +1,5 @@
 # coding: utf-8
-from makeobj.obj import make
+from .obj import make
 
 __author__ = 'JB'
 __metaclass__ = type

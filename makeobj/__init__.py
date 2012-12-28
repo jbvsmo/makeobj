@@ -5,11 +5,10 @@
     License: BSD
 """
 
-#noinspection PyUnresolvedReferences
-from makeobj.obj import make, Obj
-from makeobj.helper import attr, class_attr, keys
-from makeobj.base import ParseError
-from makeobj.text_parse import _parse, _iter_parse, _build_all
+from .obj import make, Obj
+from .helper import attr, class_attr, keys
+from .text_parse_base import ParseError
+from .text_parse import _parse, _iter_parse, _build_all
 
 __author__ = 'JB'
 __metaclass__ = type
