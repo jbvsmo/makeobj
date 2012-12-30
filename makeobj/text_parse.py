@@ -8,8 +8,24 @@ from .obj import sample_dict, make_object_from_dict, SubObj
 __author__ = 'JB'
 __metaclass__ = type
 
-#REGEX
-re_comand = re.compile(r'^@(\w+)\s*(?::\s*(\w+))?\s*(' + '|'.join(funcs) + ')\s*(.*)$')
+_re_comand = re.compile(r'^@(\w+)\s*(?::\s*(\w+))?\s*(' + '|'.join(funcs) + ')\s*(.*)$')
+
+
+def parse(text, upto=None):
+    """ Parse a block of text in makeobj format and create a list of elements
+        Works with file handlers, multiline strings and other iterables
+        The second argument can make the text parsing stop in a certain line if given.
+    """
+    if not hasattr(text, 'readlines'):
+        try:
+            text = text.splitlines()
+        except AttributeError:
+            pass # treat as an iterable of lines
+
+    objs = _build_all(_parse(_iter_parse(text, upto)))
+    if not objs:
+        raise ParseError('No object found!')
+    return objs[0] if len(objs) == 1 else objs
 
 
 def _indent(line):
@@ -19,11 +35,13 @@ def _indent(line):
     new = line.lstrip()
     return len(line) - len(new), new.rstrip()
 
+
 def _break_line(line):
-    """ Split a block opening line using regex or return an error on
+    """ Split a block opening line using regex or raise an error on
         normal lines
     """
-    return re_comand.findall(line)[0]
+    return _re_comand.findall(line)[0]
+
 
 def _iter_parse(text, upto=None):
     """ Iterate over lines, and take care of blocks and indentation levels.
@@ -121,6 +139,7 @@ def _parse(it):
 
 def _build_all(data):
     return [_build(*el) for el in data.items()]
+
 
 def _build(name, obj, dic=None, keys=None):
     """ Parse dictionaries of `PropObj` elements

@@ -50,7 +50,6 @@ or, with some more data, one may want to write a class:
 class RGBColors(makeobj.Obj):
     red, green, blue = makeobj.keys(3)
     hex = makeobj.attr('ff0000', '00ff00', '0000ff')
-
 ```
 
 Status
