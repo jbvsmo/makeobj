@@ -8,7 +8,7 @@ from .obj import sample_dict, make_object_from_dict, SubObj
 __author__ = 'JB'
 __metaclass__ = type
 
-_re_comand = re.compile(r'^@(\w+)\s*(?::\s*(\w+))?\s*(' + '|'.join(funcs) + ')\s*(.*)$')
+_re_comand = re.compile(r'^@(\w+)\s*(?::?\s*(\w+))?\s*(' + '|'.join(funcs) + ')\s*(.*)$')
 
 
 def parse(text, upto=None):
