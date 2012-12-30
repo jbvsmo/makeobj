@@ -1,6 +1,6 @@
 # coding: utf-8
-from makeobj import tools, helper
-from makeobj import obj_fix
+from . import tools, helper
+from . import obj_fix
 
 __author__ = 'JB'
 __metaclass__ = type
@@ -58,9 +58,8 @@ class __MetaObj(type):
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            start = tools.max_(tools.max_(base._keys, default=-1) for base in mcs._get_bases())
-            #print(args[0], start)
-            start = 0 if start is None else start + 1
+            start = tools.max(tools.max(base._keys, default=-1) for base in mcs._get_bases())
+            start += 1
             enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
             mcs._names = set(cls._keys)

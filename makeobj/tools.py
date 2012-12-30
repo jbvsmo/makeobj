@@ -1,6 +1,6 @@
 # coding: utf-8
 import collections
-from makeobj.even_flow import *
+from .even_flow import *
 
 __author__ = 'JB'
 
@@ -18,18 +18,18 @@ def default_min_max(iterable, key, default, fn):
         return default
 
 
-def min_(iterable, key=None, default=None):
+def min(iterable, key=None, default=None):
     """ Use a default value when it's not possible to get
         the min value of an iterable (e.g. empty sequence)
     """
-    return default_min_max(iterable, key, default, min)
+    return default_min_max(iterable, key, default, builtins.min)
 
 
-def max_(iterable, key=None, default=None):
+def max(iterable, key=None, default=None):
     """ Use a default value when it's not possible to get
         the max value of an iterable (e.g. empty sequence)
     """
-    return default_min_max(iterable, key, default, max)
+    return default_min_max(iterable, key, default, builtins.max)
 
 
 def iter_items(iterable, keys):

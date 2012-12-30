@@ -2,7 +2,7 @@ MakeObj - Powerful Enumeration System
 =====================================
 
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
-* Version:   0.5
+* Version:   0.6
 * GitHub:    <https://github.com/jbvsmo/makeobj>
 
 MakeObj is a module to help create powerful enumeration classes with support
@@ -47,10 +47,9 @@ RGBColors = makeobj.make('RGBColors', ['red', 'green', 'blue'])
 or, with some more data, one may want to write a class:
 
 ```python
-class RGBColors(Obj):
-    red, green, blue = keys(3)
-    hex = attr('ff0000', '00ff00', '0000ff')
-
+class RGBColors(makeobj.Obj):
+    red, green, blue = makeobj.keys(3)
+    hex = makeobj.attr('ff0000', '00ff00', '0000ff')
 ```
 
 Status
