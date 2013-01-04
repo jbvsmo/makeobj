@@ -1,5 +1,7 @@
 # coding: utf-8
-from . import tools, helper
+from .even_flow import *
+from . import tools
+from . import helper
 from . import obj_fix
 
 __author__ = 'JB'
@@ -43,7 +45,7 @@ class __MetaObj(type):
         keys = [k for k in dic if k in sample]
         mcs_dic = dict((k, dic.pop(k)) for k in keys)
 
-        mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), mcs_dic)
+        mcs = type(mcs.__name__ + ':' + name, tuple(type(i) for i in bases), mcs_dic)
         return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
@@ -58,7 +60,7 @@ class __MetaObj(type):
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            start = tools.max(tools.max(base._keys, default=-1) for base in mcs._get_bases())
+            start = tools.max(tools.max(base._keys, default=-1) for base in mcs._get_base_metas())
             start += 1
             enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
@@ -97,7 +99,7 @@ class __MetaObj(type):
 
             setattr(mcs, name, cls._create(i, name, dic))
 
-        mcs._names.update(*(base._names for base in mcs._get_bases()))
+        mcs._names.update(*(base._names for base in mcs._get_base_metas()))
 
         for name in ['_attr', '_attrs', '_meth']:
             if name in mcs.__dict__:
@@ -112,7 +114,9 @@ class __MetaObj(type):
         return list(cls.__dict__) + ['_keys', '_methods', '_names'] + list(cls._names)
 
     def __repr__(cls):
-        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
+        keys = sorted((cls(x).value, x) for x in cls._names)
+        keys = ['{1}:{0}'.format(*x) for x in keys]
+        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(keys))
 
     def __getitem__(cls, value):
         """ Get the enum element by its value. It performs checks on parent classes
@@ -121,9 +125,10 @@ class __MetaObj(type):
         try:
             return cls(cls._keys[value])
         except KeyError:
-            for c in cls.mro():
+            for c in cls._get_bases():
                 if value in c._keys:
                     return c[value]
+        raise KeyError(value)
 
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
@@ -132,12 +137,28 @@ class __MetaObj(type):
             pass
         p.text(repr(cls))
 
-    @classmethod
-    def _get_bases(mcs):
-        """ Get all base classes up to __MetaObj from mro and remove self
+    @NoUnbound
+    def _get_bases(cls, meta=False):
+        """ Get all base classes up to `Obj` from mro and remove cls from
+            the list. If `meta` is true, it return all base metaclasses up to
+            `__MetaObj`.
+            This function is needs NoUnbound decorator because of stupid
+            `unbound method` on Py2k
         """
-        __MetaObj = globals()['__MetaObj']
-        return [base for base in mcs.__mro__[1:] if issubclass(base, __MetaObj)]
+        initial = Obj
+        if meta:
+            initial = type(initial)
+            if not issubclass(cls, initial):
+                cls = type(cls)
+
+        return [base for base in cls.__mro__[1:] if issubclass(base, initial)]
+
+
+    @classmethod
+    def _get_base_metas(mcs):
+        """ Get all base metaclasses up to `__MetaObj`.
+        """
+        return mcs._get_bases(mcs, meta=True)
 
     @classmethod
     def _check_key(mcs, key):
@@ -148,7 +169,7 @@ class __MetaObj(type):
         if key in mcs._keys:
             return True
 
-        bases = mcs._get_bases()
+        bases = mcs._get_base_metas()
         return any(key in base._keys for base in bases)
 
     def _create(cls, val, name, attr):
@@ -171,7 +192,6 @@ class __MetaObj(type):
         for k, v in attr.items():
             setattr(self, k, v)
         return self
-
 
 class Obj:
     """ Base class without metaclass because of python 2.x/3.x
@@ -197,7 +217,7 @@ class Obj:
         return list(self.__dict__) + list(type(self)._methods)
 
     def __repr__(self):
-        return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
+        return '<Value: {0.__name__}.{1._name} = {1._value}>'.format(type(self), self)
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
