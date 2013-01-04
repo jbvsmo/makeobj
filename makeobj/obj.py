@@ -1,5 +1,4 @@
 # coding: utf-8
-from .even_flow import *
 from . import tools
 from . import helper
 from . import obj_fix
@@ -81,8 +80,9 @@ class __MetaObj(type):
 
         for k, v in mcs._meth.items():
             v.__name__ = k  # just in case some lambdas reach here
-            setattr(cls, k, v)
-        mcs._methods = sorted(mcs._meth)
+            setattr(cls, k, tools.no_unbound(v))  # Functions that are not unbound methods are much
+                                                  # more useful when using on super class elements
+        mcs._methods = sorted(mcs._meth)  # Just the names
 
         mcs._keys = {}
         for i, name in enum:
@@ -137,13 +137,11 @@ class __MetaObj(type):
             pass
         p.text(repr(cls))
 
-    @NoUnbound
+    @tools.NoUnbound
     def _get_bases(cls, meta=False):
         """ Get all base classes up to `Obj` from mro and remove cls from
             the list. If `meta` is true, it return all base metaclasses up to
             `__MetaObj`.
-            This function is needs NoUnbound decorator because of stupid
-            `unbound method` on Py2k
         """
         initial = Obj
         if meta:
@@ -152,7 +150,6 @@ class __MetaObj(type):
                 cls = type(cls)
 
         return [base for base in cls.__mro__[1:] if issubclass(base, initial)]
-
 
     @classmethod
     def _get_base_metas(mcs):

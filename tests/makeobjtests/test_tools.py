@@ -1,6 +1,8 @@
 # coding: utf-8
 
 import unittest
+import types
+from makeobj.even_flow import *
 from makeobj import tools as t
 
 __author__ = 'JB'
@@ -35,3 +37,25 @@ class ToolsTest(unittest.TestCase):
 
         self.assertEqual(it(y, 'abcd'), final)
         self.assertEqual(it(y, 'abc'), final[:-1])
+
+    def test_no_unbound_stuff(self):
+
+        class C(object):
+            def f(self):
+                pass
+
+            @t.NoUnbound
+            def g(self):
+                pass
+
+            @t.no_unbound
+            def h(self):
+                pass
+
+        if v3:
+            self.assertEqual(type(C.f), types.FunctionType)
+        else:
+            self.assertNotEqual(type(C.f), types.FunctionType)
+
+        self.assertEqual(type(C.g), types.FunctionType)
+        self.assertEqual(type(C.h), types.FunctionType)
