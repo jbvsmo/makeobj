@@ -244,3 +244,23 @@ class ObjTestSubclass(unittest.TestCase):
             self.assertEqual(Z.f(Z.b), Z.b.value + 1)
 
         self.assertEqual(Z.c.f(), Z.c.value + 1)
+
+
+class Lookup_Possible(o.Obj):
+    a, b = keys(2)
+
+
+class OtherTests(unittest.TestCase):
+
+    def test_pickle(self):
+        import pickle
+
+        X = Lookup_Possible
+
+        _X = pickle.loads(pickle.dumps(X))
+        _X_a = pickle.loads(pickle.dumps(X.a))
+        _X_b = pickle.loads(pickle.dumps(X.b))
+
+        self.assertEqual(X, _X)
+        self.assertEqual(X.a, _X_a)
+        self.assert_(X.b is _X_b)

@@ -231,6 +231,9 @@ class Obj(object):
     def __repr__(self):
         return '<Value: {0.__name__}.{1._name} = {1._value}>'.format(type(self), self)
 
+    def __reduce__(self):
+        return type(self), (self._name,)
+
     def __int__(self):
         return self._value
 
