@@ -18,6 +18,8 @@ v3 = _sys.version_info[0] == 3
 if v3:
     basestring = str
     long = int
+    cmp = lambda first, second: NotImplemented
+
     if not hasattr(builtins, 'callable'):
         def callable(object):
             return isinstance(object, _collections.Callable)

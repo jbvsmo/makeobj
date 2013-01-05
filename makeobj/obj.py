@@ -2,10 +2,12 @@
 from . import tools
 from . import helper
 from . import obj_fix
+import operator
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('make', 'Obj')
+__all__ = ('Obj', 'SubObj', 'make',
+           'sample_dict', 'make_object_from_dict')
 
 
 def sample_dict():
@@ -87,8 +89,8 @@ class __MetaObj(type):
         mcs._keys = {}
         for i, name in enum:
             if not isinstance(i, helper.ALLOWED_ENUM_TYPES):
-                raise TypeError('Enumeration values must be of types %r'
-                                % helper.ALLOWED_ENUM_TYPES)
+                raise TypeError('Enumeration values must be of type (%s)'
+                                % ', '.join(x.__name__ for x in helper.ALLOWED_ENUM_TYPES))
             if mcs._check_key(i):
                 raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
             mcs._keys[i] = name
@@ -190,7 +192,20 @@ class __MetaObj(type):
             setattr(self, k, v)
         return self
 
-class Obj:
+
+def _base_cmp(op):
+    """ Create comparison between elements of same type or on the others mro
+    """
+    def fn(self, other):
+        if isinstance(self, type(other)):
+            return op(self._value, other._value)
+        return NotImplemented
+
+    fn.__name__ = op.__name__
+    return fn
+
+
+class Obj(object):
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
     """
@@ -216,11 +231,40 @@ class Obj:
     def __repr__(self):
         return '<Value: {0.__name__}.{1._name} = {1._value}>'.format(type(self), self)
 
+    def __int__(self):
+        return self._value
+
+    # These elements need to be hashable and because of the comparisons below
+    # the class would not inherit the __hash__ function.
+    # This is better than `hash(self._value)` to make it probably unique.
+    __hash__ = object.__hash__
+
+    # Allow comparison from elements of same type.
+    # For simplicity, __le__ and __ge__ do not check if `self is other`.
+    __le__ = _base_cmp(operator.__le__)
+    __lt__ = _base_cmp(operator.__lt__)
+    __ge__ = _base_cmp(operator.__ge__)
+    __gt__ = _base_cmp(operator.__gt__)
+
+    # An object can only be equal to other when they're the same.
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    # Old Py2k behavior -- unacceptable.
+    def __cmp__(self, other):
+        raise TypeError('unorderable types: %s() and %s()' %
+                        (type(self).__name__, type(other).__name__))
+
+
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
-class SubObj:
+
+class SubObj(object):
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
     """
@@ -264,7 +308,7 @@ def make(name, keys, order=None, methods=None, common_attr=None, doc=None, extra
     if isinstance(keys, dict):
         attr = keys
         if order:
-            if hasattr(order, '__call__'):
+            if callable(order):
                 keys = order(keys)
             else:
                 keys = order

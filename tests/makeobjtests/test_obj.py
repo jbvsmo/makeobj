@@ -104,6 +104,52 @@ class ObjTest(unittest.TestCase):
         f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
         self.assertRaises(RuntimeError, f)
 
+class ObjTestComparison(unittest.TestCase):
+
+    def setUp(self):
+        class A(o.Obj):
+            a, b = keys(2)
+        class B(o.Obj):
+            a, b = keys(2)
+        class C(A):
+            c, d = keys(2)
+
+        self.cls = A, B, C
+
+    def test_lt_le_gt_ge(self):
+        A, B, C = self.cls
+
+        self.assert_(A.a < C.c)
+        self.assert_(C.c > A.a)
+        self.assert_(A.b <= C.d)
+        self.assert_(C.d >= A.b)
+        self.assertRaises(TypeError, lambda: A.a < B.b)
+        self.assertRaises(TypeError, lambda: A.a > B.b)
+        self.assertRaises(TypeError, lambda: B.a <= A.b)
+        self.assertRaises(TypeError, lambda: B.b >= A.a)
+
+    def test_eq_ne(self):
+        A, B, C = self.cls
+
+        self.assertEqual(A.a, C.a)
+        self.assertEqual(C.b, A.b)
+        self.assertNotEqual(A.a, B.a)
+        self.assertNotEqual(B.b, C.b)
+
+        if not v3:
+            # Do not allow old style comparisons
+            self.assertRaises(TypeError, cmp, A.a, B.a)
+            self.assertRaises(TypeError, cmp, B.b, A.b)
+
+    def test_sort(self):
+        A, B, C = self.cls
+
+        self.assertEquals(sorted([C.b, C.d, C.a, C.c]),
+                                 [C.a, C.b, C.c, C.d])
+
+        self.assertEquals(sorted([C.b, C.d, C.a, C.c], reverse=1),
+                                 [C.d, C.c, C.b, C.a])
+
 
 class ObjTestSubclass(unittest.TestCase):
 
