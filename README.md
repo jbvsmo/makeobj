@@ -4,6 +4,7 @@ MakeObj - Powerful Enumeration System
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
 * Version:   0.7
 * GitHub:    <https://github.com/jbvsmo/makeobj>
+* Wiki:      <https://github.com/jbvsmo/makeobj/wiki>
 
 MakeObj is a module to help create powerful enumeration classes with support
 to attributes specific for each element.
@@ -16,12 +17,12 @@ Using it
 MakeObj lets you create enumerations with a simple language like that:
 
 ```python
-@obj: RGBColors =:
+@obj RGBColors =:
     @keys = 'red', 'green', 'blue'
 
-    @attr: hex = 'ff0000', '00ff00', '0000ff'
+    @attr hex = 'ff0000', '00ff00', '0000ff'
 
-    @attr: is_nice =:
+    @attr is_nice =:
         @default = False
         @set => 'blue': True
 ```
@@ -60,8 +61,9 @@ It will parse conformant code, but still may not show all the errors and may loa
 file skipping some data when it should raise an error.
 
 The `make` function works fine but it may be easier to write a class instead. The
-`SubObj` machinery (see the `tests/files` directory for examples) only works in
-the Enum Language. Yet!
+`SubObj` machinery (see the [Wiki](https://github.com/jbvsmo/makeobj/wiki/Enum-Language) entry)
+only works in the Enum Language. Yet!
+
 
 
 Features
