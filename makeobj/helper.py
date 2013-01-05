@@ -5,7 +5,7 @@ __author__ = 'JB'
 __all__ = ('attr', 'class_attr', 'keys')
 
 
-ALLOWED_ENUM_TYPES = (int,)
+ALLOWED_ENUM_TYPES = tuple(set([int, long]))
 
 
 class Modes(object):

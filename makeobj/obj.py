@@ -1,10 +1,13 @@
 # coding: utf-8
-from . import tools, helper
+from . import tools
+from . import helper
 from . import obj_fix
+import operator
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('make', 'Obj')
+__all__ = ('Obj', 'SubObj', 'make',
+           'sample_dict', 'make_object_from_dict')
 
 
 def sample_dict():
@@ -43,7 +46,7 @@ class __MetaObj(type):
         keys = [k for k in dic if k in sample]
         mcs_dic = dict((k, dic.pop(k)) for k in keys)
 
-        mcs = type(mcs.__name__ + ' > ' + name, tuple(type(i) for i in bases), mcs_dic)
+        mcs = type(mcs.__name__ + ':' + name, tuple(type(i) for i in bases), mcs_dic)
         return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
@@ -58,7 +61,7 @@ class __MetaObj(type):
             mcs._keys = list(mcs._keys)
             _, _ = mcs._keys[0]
         except (ValueError, TypeError, IndexError, KeyError):
-            start = tools.max(tools.max(base._keys, default=-1) for base in mcs._get_bases())
+            start = tools.max(tools.max(base._keys, default=-1) for base in mcs._get_base_metas())
             start += 1
             enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
@@ -79,14 +82,15 @@ class __MetaObj(type):
 
         for k, v in mcs._meth.items():
             v.__name__ = k  # just in case some lambdas reach here
-            setattr(cls, k, v)
-        mcs._methods = sorted(mcs._meth)
+            setattr(cls, k, tools.no_unbound(v))  # Functions that are not unbound methods are much
+                                                  # more useful when using on super class elements
+        mcs._methods = sorted(mcs._meth)  # Just the names
 
         mcs._keys = {}
         for i, name in enum:
             if not isinstance(i, helper.ALLOWED_ENUM_TYPES):
-                raise TypeError('Enumeration values must be of types %r'
-                                % helper.ALLOWED_ENUM_TYPES)
+                raise TypeError('Enumeration values must be of type (%s)'
+                                % ', '.join(x.__name__ for x in helper.ALLOWED_ENUM_TYPES))
             if mcs._check_key(i):
                 raise RuntimeError('Repeated enum value: %r for key %r' % (i, name))
             mcs._keys[i] = name
@@ -97,7 +101,7 @@ class __MetaObj(type):
 
             setattr(mcs, name, cls._create(i, name, dic))
 
-        mcs._names.update(*(base._names for base in mcs._get_bases()))
+        mcs._names.update(*(base._names for base in mcs._get_base_metas()))
 
         for name in ['_attr', '_attrs', '_meth']:
             if name in mcs.__dict__:
@@ -112,7 +116,9 @@ class __MetaObj(type):
         return list(cls.__dict__) + ['_keys', '_methods', '_names'] + list(cls._names)
 
     def __repr__(cls):
-        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(sorted(cls._names)))
+        keys = sorted((cls(x).value, x) for x in cls._names)
+        keys = ['{1}:{0}'.format(*x) for x in keys]
+        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(keys))
 
     def __getitem__(cls, value):
         """ Get the enum element by its value. It performs checks on parent classes
@@ -121,9 +127,10 @@ class __MetaObj(type):
         try:
             return cls(cls._keys[value])
         except KeyError:
-            for c in cls.mro():
+            for c in cls._get_bases():
                 if value in c._keys:
                     return c[value]
+        raise KeyError(value)
 
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
@@ -132,12 +139,25 @@ class __MetaObj(type):
             pass
         p.text(repr(cls))
 
-    @classmethod
-    def _get_bases(mcs):
-        """ Get all base classes up to __MetaObj from mro and remove self
+    @tools.NoUnbound
+    def _get_bases(cls, meta=False):
+        """ Get all base classes up to `Obj` from mro and remove cls from
+            the list. If `meta` is true, it return all base metaclasses up to
+            `__MetaObj`.
         """
-        __MetaObj = globals()['__MetaObj']
-        return [base for base in mcs.__mro__[1:] if issubclass(base, __MetaObj)]
+        initial = Obj
+        if meta:
+            initial = type(initial)
+            if not issubclass(cls, initial):
+                cls = type(cls)
+
+        return [base for base in cls.__mro__[1:] if issubclass(base, initial)]
+
+    @classmethod
+    def _get_base_metas(mcs):
+        """ Get all base metaclasses up to `__MetaObj`.
+        """
+        return mcs._get_bases(mcs, meta=True)
 
     @classmethod
     def _check_key(mcs, key):
@@ -148,7 +168,7 @@ class __MetaObj(type):
         if key in mcs._keys:
             return True
 
-        bases = mcs._get_bases()
+        bases = mcs._get_base_metas()
         return any(key in base._keys for base in bases)
 
     def _create(cls, val, name, attr):
@@ -173,7 +193,19 @@ class __MetaObj(type):
         return self
 
 
-class Obj:
+def _base_cmp(op):
+    """ Create comparison between elements of same type or on the others mro
+    """
+    def fn(self, other):
+        if isinstance(self, type(other)):
+            return op(self._value, other._value)
+        return NotImplemented
+
+    fn.__name__ = op.__name__
+    return fn
+
+
+class Obj(object):
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
     """
@@ -197,13 +229,45 @@ class Obj:
         return list(self.__dict__) + list(type(self)._methods)
 
     def __repr__(self):
-        return '<Value: {0.__name__}.{1._name} = {1._value} >'.format(type(self), self)
+        return '<Value: {0.__name__}.{1._name} = {1._value}>'.format(type(self), self)
+
+    def __reduce__(self):
+        return type(self), (self._name,)
+
+    def __int__(self):
+        return self._value
+
+    # These elements need to be hashable and because of the comparisons below
+    # the class would not inherit the __hash__ function.
+    # This is better than `hash(self._value)` to make it probably unique.
+    __hash__ = object.__hash__
+
+    # Allow comparison from elements of same type.
+    # For simplicity, __le__ and __ge__ do not check if `self is other`.
+    __le__ = _base_cmp(operator.__le__)
+    __lt__ = _base_cmp(operator.__lt__)
+    __ge__ = _base_cmp(operator.__ge__)
+    __gt__ = _base_cmp(operator.__gt__)
+
+    # An object can only be equal to other when they're the same.
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    # Old Py2k behavior -- unacceptable.
+    def __cmp__(self, other):
+        raise TypeError('unorderable types: %s() and %s()' %
+                        (type(self).__name__, type(other).__name__))
+
 
 # Applying Metaclass compatible with both Python 2.x and 3.x
 # Calling explicit type.__new__ is needed to avoid running MetaObj.__new__
 Obj = type.__new__(__MetaObj, 'Obj', (Obj,), {})
 
-class SubObj:
+
+class SubObj(object):
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
     """
@@ -247,7 +311,7 @@ def make(name, keys, order=None, methods=None, common_attr=None, doc=None, extra
     if isinstance(keys, dict):
         attr = keys
         if order:
-            if hasattr(order, '__call__'):
+            if callable(order):
                 keys = order(keys)
             else:
                 keys = order

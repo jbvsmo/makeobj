@@ -15,7 +15,7 @@ __metaclass__ = type
 __all__ = ('parse', 'ParseError', 'make', 'Obj',
            'attr', 'class_attr', 'keys',)
 
-version = '0.6'
+version = '0.7'
 
 
 if __name__ == '__main__':
