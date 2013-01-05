@@ -22,7 +22,7 @@ def parse(text, upto=None):
         except AttributeError:
             pass # treat as an iterable of lines
 
-    objs = _build_all(_parse(_iter_parse(text, upto)))
+    objs = _build_all(*_parse(_iter_parse(text, upto)))
     if not objs:
         raise ParseError('No object found!')
     return objs[0] if len(objs) == 1 else objs
@@ -112,9 +112,10 @@ def _parse(it):
         by running on top of `_iter_parse` iterator.
     """
     data = {}
+    order = []  # top-level objects must be in the right order
     for i,j in it:
         if j in (Info.close, Info.end):
-            return data
+            return data, order
         if j is Info.data:
             prop, name, op, val = i
             prop = Prop(prop)
@@ -130,15 +131,17 @@ def _parse(it):
                         val = ast.literal_eval(val)
                         prop = Prop.default
                     else:
-                        val = _parse(it)
+                        val, _ = _parse(it)
             else:
                 pass # TODO missing the value conversion for OP.eq
+            if name not in data:
+                order.append(name)
             data[name] = prop(val)
-    return data
+    return data, order
 
 
-def _build_all(data):
-    return [_build(*el) for el in data.items()]
+def _build_all(data, order):
+    return [_build(el, data[el]) for el in order]
 
 
 def _build(name, obj, dic=None, keys=None):

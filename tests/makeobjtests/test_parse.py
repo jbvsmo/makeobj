@@ -74,3 +74,28 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(A.a.value, 0)
         self.assertEqual(A.b.x, 1)
         self.assertEqual(A.c.name, 'c')
+
+    def test_order(self):
+        t = '''
+        @obj A =:
+            @keys = 'a', 'b'
+
+        @obj B =:
+            @keys = 'a', 'b'
+
+        @obj C =:
+            @keys = 'a', 'b'
+
+        @obj D =:
+            @keys = 'a', 'b'
+
+        @obj F =:
+            @keys = 'a', 'b'
+
+        @obj E =:
+            @keys = 'a', 'b'
+        '''
+
+        objs = makeobj.parse(t)
+        names = ''.join(x.__name__ for x in objs)
+        self.assertEqual(names, 'ABCDFE')
