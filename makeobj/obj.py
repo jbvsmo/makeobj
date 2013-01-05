@@ -45,8 +45,10 @@ class __MetaObj(type):
         # Add to metaclass only the right attributes.
         keys = [k for k in dic if k in sample]
         mcs_dic = dict((k, dic.pop(k)) for k in keys)
+        mcs_bases = tuple(type(i) for i in bases)
+        mcs_name = 'META::' + name
+        mcs = type(mcs_name, mcs_bases, mcs_dic)
 
-        mcs = type(mcs.__name__ + ':' + name, tuple(type(i) for i in bases), mcs_dic)
         return type.__new__(mcs, name, bases, dic)
 
     def __init__(cls, *args, **kw):
@@ -118,7 +120,8 @@ class __MetaObj(type):
     def __iter__(cls):
         """ Sorted enumeration elements
         """
-        return iter(sorted(cls(x) for x in cls._names))
+        return iter(sorted((cls(x) for x in cls._names),
+                           key=operator.attrgetter('_value')))
 
     def __repr__(cls):
         keys = ', '.join('{0._name}:{0._value}'.format(x) for x in cls)
