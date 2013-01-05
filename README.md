@@ -2,7 +2,7 @@ MakeObj - Powerful Enumeration System
 =====================================
 
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
-* Version:   0.7
+* Version:   0.8
 * GitHub:    <https://github.com/jbvsmo/makeobj>
 
 MakeObj is a module to help create powerful enumeration classes with support
