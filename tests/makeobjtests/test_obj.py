@@ -104,6 +104,15 @@ class ObjTest(unittest.TestCase):
         f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
         self.assertRaises(RuntimeError, f)
 
+    def test_iterate(self):
+        class A(o.Obj):
+            a, b = keys(2)
+        class B(A):
+            c, d = keys(2)
+
+        self.assertEqual(list(A), [A.a, A.b])
+        self.assertEqual(tuple(B), (B.a, B.b, B.c, B.d))
+
 class ObjTestComparison(unittest.TestCase):
 
     def setUp(self):

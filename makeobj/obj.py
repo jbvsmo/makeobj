@@ -115,10 +115,14 @@ class __MetaObj(type):
         """
         return list(cls.__dict__) + ['_keys', '_methods', '_names'] + list(cls._names)
 
+    def __iter__(cls):
+        """ Sorted enumeration elements
+        """
+        return iter(sorted(cls(x) for x in cls._names))
+
     def __repr__(cls):
-        keys = sorted((cls(x).value, x) for x in cls._names)
-        keys = ['{1}:{0}'.format(*x) for x in keys]
-        return '<Object: {0.__name__} -> [{1}]>'.format(cls, ', '.join(keys))
+        keys = ', '.join('{0._name}:{0._value}'.format(x) for x in cls)
+        return '<Object: {0.__name__} -> [{1}]>'.format(cls, keys)
 
     def __getitem__(cls, value):
         """ Get the enum element by its value. It performs checks on parent classes
