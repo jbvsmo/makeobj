@@ -64,3 +64,21 @@ def no_unbound(function):
     if isinstance(function, types.FunctionType):
         return NoUnbound(function)
     return function
+
+
+def duplicate(seq):
+    """ Find first duplicate element.
+    """
+    seen = set()
+    for n in seq:
+        if n in seen:
+            return n
+        else:
+            seen.add(n)
+    raise ValueError('Not found')
+
+
+def flat(seq):
+    """ Make a 2-D sequence flat
+    """
+    return [val for sub in seq for val in sub]

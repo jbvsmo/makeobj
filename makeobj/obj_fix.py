@@ -3,6 +3,7 @@ import collections
 import types
 from .helper import Modes, Special, ALLOWED_ENUM_TYPES
 from .even_flow import *
+from . import tools
 
 __author__ = 'JB'
 
@@ -98,3 +99,25 @@ def _fix_attr(attr, _attr, keys):
                 out[k][name] = el
 
     return dict(out)
+
+def _check_bases(bases):
+    """ Check for repeated names or keys on base classes.
+    """
+    if len(bases) == 1:
+        return
+
+    names = tools.flat(b._names for b in bases)
+    try:
+        dup = tools.duplicate(names)
+    except ValueError:
+        pass
+    else:
+        raise TypeError('Duplicated enum name on parent classes: %r' % dup)
+
+    values = tools.flat(b._keys for b in bases)
+    try:
+        dup = tools.duplicate(values)
+    except ValueError:
+        pass
+    else:
+        raise TypeError('Duplicated enum value on parent classes: %s' % dup)

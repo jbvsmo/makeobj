@@ -59,3 +59,15 @@ class ToolsTest(unittest.TestCase):
 
         self.assertEqual(type(C.g), types.FunctionType)
         self.assertEqual(type(C.h), types.FunctionType)
+
+    def test_duplicate(self):
+
+        self.assertEqual(t.duplicate([1, 2, 3, 4, 2]), 2)
+        self.assertRaises(ValueError, t.duplicate, [1, 2, 3, 4, 5])
+
+    def test_flat(self):
+
+        self.assertEqual(t.flat([[1, 2], [3, 4]]), [1, 2, 3, 4])
+
+        self.assertEqual(t.flat(['a', 'xyz', 'wwww', 't']),
+                         ['a', 'x', 'y', 'z', 'w', 'w', 'w', 'w', 't'])

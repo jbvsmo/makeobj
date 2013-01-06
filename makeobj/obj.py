@@ -61,9 +61,12 @@ class __MetaObj(type):
 
         return type.__new__(mcs, name, bases, dic)
 
-    def __init__(cls, *args, **kw):
-        type.__init__(cls, *args, **kw)
+    def __init__(cls, name, bases, dic):
+        type.__init__(cls, name, bases, dic)
         mcs = type(cls)  # metaclass
+
+        # If there's more than one base class, enumeration values should be checked
+        obj_fix._check_bases(bases)
 
         if not mcs.__dict__.get('_keys'):
             mcs._keys = ()  # Nothing to instantiate
@@ -77,7 +80,7 @@ class __MetaObj(type):
             start += 1
             enum = enumerate(mcs._keys, start)
             # Get only the names in a set for fast check
-            mcs._names = set(cls._keys)
+            mcs._names = set(mcs._keys)
         else:
             try:
                 # Check if the attributes *also* came in (num, name) format

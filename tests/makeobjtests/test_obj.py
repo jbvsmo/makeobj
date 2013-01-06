@@ -255,6 +255,51 @@ class ObjTestSubclass(unittest.TestCase):
         self.assertEqual(Z.c.f(), Z.c.value + 1)
 
 
+class ObjTestMultipleSubclass(unittest.TestCase):
+
+    def setUp(self):
+        class A(o.Obj):
+            a, b = 1, 2
+
+        class B(o.Obj):
+            c, d = 3, 4
+
+        class C(o.Obj):
+            c, d = 3, 2
+
+        class D(o.Obj):
+            b, c = 3, 4
+
+        self.cls = A, B, C, D
+
+    def test_multiple_subclass(self):
+        A, B, C, D = self.cls
+
+        # Py2.x do not accept `metaclass=no_conflict` syntax
+        E = o.no_conflict('E', (A, B), {})
+        F = o.no_conflict('F', (A, B), {'e': 5})
+
+        self.assertEqual(F.a.value, 1)
+        self.assertEqual(E.b.value, 2)
+        self.assertEqual(F.c.value, 3)
+        self.assertEqual(E.d.value, 4)
+        self.assertEqual(F.e.value, 5)
+
+    def test_multiple_subclass_clash(self):
+        A, B, C, D = self.cls
+        # Key clash
+        self.assertRaises(TypeError, o.no_conflict, 'X', A, C, {})
+        self.assertRaises(TypeError, o.no_conflict, 'X', C, A, {})
+
+        # Name clash
+        self.assertRaises(TypeError, o.no_conflict, 'X', A, D, {})
+        self.assertRaises(TypeError, o.no_conflict, 'X', D, A, {})
+
+        # Both
+        self.assertRaises(TypeError, o.no_conflict, 'X', C, D, {})
+        self.assertRaises(TypeError, o.no_conflict, 'X', D, C, {})
+
+
 class Lookup_Possible(o.Obj):
     a, b = keys(2)
 
