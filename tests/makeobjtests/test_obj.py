@@ -273,3 +273,18 @@ class OtherTests(unittest.TestCase):
         self.assertEqual(X, _X)
         self.assertEqual(X.a, _X_a)
         self.assert_(X.b is _X_b)
+
+    def test_isinstance(self):
+
+        class C(o.Obj):
+            a, b = 1, 2
+
+        class D(C):
+            c, d = keys(2)
+
+        self.assert_(isinstance(C.a, D))
+        self.assert_(isinstance(C.b, D))
+        self.assert_(isinstance(D.a, C))
+        self.assert_(isinstance(D.b, C))
+        self.assert_(isinstance(D.c, C))
+        self.assert_(isinstance(D.d, C))

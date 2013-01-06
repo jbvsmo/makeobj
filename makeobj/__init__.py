@@ -5,14 +5,14 @@
     License: BSD
 """
 
-from .obj import make, Obj
+from .obj import make, Obj, no_conflict
 from .helper import attr, class_attr, keys
 from .text_parse_base import ParseError
 from .text_parse import parse
 
 __author__ = 'JB'
-__metaclass__ = type
-__all__ = ('parse', 'ParseError', 'make', 'Obj',
+__all__ = ('parse', 'ParseError',
+           'make', 'Obj', 'no_conflict',
            'attr', 'class_attr', 'keys',)
 
 version = '0.8'

@@ -1,4 +1,5 @@
 # coding: utf-8
+from .even_flow import *
 from . import tools
 from . import helper
 from . import obj_fix
@@ -6,7 +7,7 @@ import operator
 
 __author__ = 'JB'
 __metaclass__ = type
-__all__ = ('Obj', 'SubObj', 'make',
+__all__ = ('Obj', 'SubObj', 'make', 'no_conflict',
            'sample_dict', 'make_object_from_dict')
 
 
@@ -16,6 +17,15 @@ def sample_dict():
     return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
 
 sample = sample_dict()
+
+
+def no_conflict(*args, **kw):
+    """ Call the base metaclass constructor for Obj classes.
+        Should be used on multiple inheritance:
+            class C(A, B, metaclass=no_conflict): ...
+        Where `A` and `B` are subclasses of `Obj`
+    """
+    return type(Obj)(*args, **kw)
 
 
 class __MetaObj(type):
@@ -138,6 +148,13 @@ class __MetaObj(type):
                 if value in c._keys:
                     return c[value]
         raise KeyError(value)
+
+    def __instancecheck__(cls, instance=None):
+        """ Make elements of super classes to be instances of this class.
+        """
+        icls = type(instance)
+        return cls in icls.__mro__ or \
+               icls in cls.__mro__
 
     def _repr_pretty_(cls, p, cycle):
         """ IPython 0.13+ friendly representation for classes.
