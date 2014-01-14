@@ -52,10 +52,10 @@ class ToolsTest(unittest.TestCase):
             def h(self):
                 pass
 
-        if v3:
-            self.assertEqual(type(C.f), types.FunctionType)
-        else:
+        if v2:
             self.assertNotEqual(type(C.f), types.FunctionType)
+        else:
+            self.assertEqual(type(C.f), types.FunctionType)
 
         self.assertEqual(type(C.g), types.FunctionType)
         self.assertEqual(type(C.h), types.FunctionType)

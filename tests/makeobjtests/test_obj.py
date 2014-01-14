@@ -145,7 +145,7 @@ class ObjTestComparison(unittest.TestCase):
         self.assertNotEqual(A.a, B.a)
         self.assertNotEqual(B.b, C.b)
 
-        if not v3:
+        if v2:
             # Do not allow old style comparisons
             self.assertRaises(TypeError, cmp, A.a, B.a)
             self.assertRaises(TypeError, cmp, B.b, A.b)
@@ -247,10 +247,10 @@ class ObjTestSubclass(unittest.TestCase):
     def test_method(self):
         X, Y, Z = self.cls[:3]
 
-        if v3:
-            # Methods bound to classes will not work (old Py2k behavior)
-            self.assertEqual(Z.f(Z.a), Z.a.value + 1)
-            self.assertEqual(Z.f(Z.b), Z.b.value + 1)
+        # Methods bound to classes did not work (old Py2k behavior)
+        # Now they should work because of NoUnbound feature
+        self.assertEqual(Z.f(Z.a), Z.a.value + 1)
+        self.assertEqual(Z.f(Z.b), Z.b.value + 1)
 
         self.assertEqual(Z.c.f(), Z.c.value + 1)
 

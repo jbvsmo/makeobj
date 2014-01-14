@@ -13,9 +13,9 @@ try:
 except ImportError:
     import __builtin__ as builtins
 
-v3 = _sys.version_info[0] == 3
+v2 = _sys.version_info[0] == 2
 
-if v3:
+if not v2:
     basestring = str
     long = int
     cmp = lambda first, second: NotImplemented
