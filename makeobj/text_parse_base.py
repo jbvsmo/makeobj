@@ -4,10 +4,13 @@ from .obj import make
 __author__ = 'JB'
 __metaclass__ = type
 
+
 class ParseError(Exception):
     pass
 
+
 funcs = ['==', '=>', '=:', '=']
+
 
 class OP:
     """ Possible operators for makeobj blocks
@@ -27,16 +30,20 @@ Info = make('Info', ['close', 'open', 'data', 'line', 'end'],
 class PropObj:
     """ Object to hold property elements
     """
+
     def __init__(self, mode, value):
         self.mode = mode
         self.value = value
+
     def __repr__(self):
         return '<{0.mode}: {0.value}>'.format(self)
+
 
 def prop_call(self, value):
     """ Create a new PropObj with the call syntax for the prop object
     """
     return PropObj(self, value)
+
 
 doc = """ Possible properties for objects """
 Prop = make('Prop', ['obj', 'keys', 'attr', 'default', 'set', 'method', 'sub'],

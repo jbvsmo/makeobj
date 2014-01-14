@@ -20,7 +20,7 @@ def parse(text, upto=None):
         try:
             text = text.splitlines()
         except AttributeError:
-            pass # treat as an iterable of lines
+            pass  # Treat as an iterable of lines
 
     objs = _build_all(*_parse(_iter_parse(text, upto)))
     if not objs:
@@ -66,7 +66,7 @@ def _iter_parse(text, upto=None):
             if increase_indent:
                 ParseError('Expected an indented block. Line %s' % cnt)
             while i != old:
-                yield None, Info.close #end of block
+                yield None, Info.close  # End of block
 
                 indent_history.pop()
                 if not indent_history:
@@ -76,18 +76,18 @@ def _iter_parse(text, upto=None):
             if not increase_indent:
                 raise ParseError('Unexpect indentation. Line %s' % cnt)
             indent_history.append(i)
-            yield None, Info.open #start of new block
+            yield None, Info.open  # Start of new block
 
         try:
             data = _break_line(line)
             increase_indent = not data[-1]
-            yield data, Info.data #block of only one line with Python data
+            yield data, Info.data  # Block of only one line with Python data
 
         except IndexError:
             increase_indent = False
-            yield line, Info.line #line of Python data
+            yield line, Info.line  # Line of Python data
 
-    yield None, Info.end #end of file. Should work the same way as Info.close
+    yield None, Info.end  # End of file. Should work the same way as Info.close
 
 
 def _load_block(iterator, op):
@@ -98,7 +98,7 @@ def _load_block(iterator, op):
     """
     if next(iterator)[1] is not Info.open:
         raise ParseError("Missing Block!")
-    data = itertools.takewhile(lambda x:x[1] is Info.line, iterator)
+    data = itertools.takewhile(lambda x: x[1] is Info.line, iterator)
     if op == OP.py:
         #multiline list
         return [ast.literal_eval(x[0]) for x in data]
@@ -113,7 +113,7 @@ def _parse(it):
     """
     data = {}
     order = []  # top-level objects must be in the right order
-    for i,j in it:
+    for i, j in it:
         if j in (Info.close, Info.end):
             return data, order
         if j is Info.data:
@@ -122,10 +122,10 @@ def _parse(it):
             if not name:
                 name = '@' + prop.name
             if op != OP.eq:
-                if op != OP.obj: # There's not a sub object (new block)
-                    val = ast.literal_eval(val if op == OP.py else '{%s}' % val)\
-                    if val\
-                    else _load_block(it, op)
+                if op != OP.obj:  # There's not a sub object (new block)
+                    val = ast.literal_eval(val if op == OP.py else '{%s}' % val) \
+                        if val \
+                        else _load_block(it, op)
                 else:
                     if val:
                         val = ast.literal_eval(val)
@@ -133,7 +133,7 @@ def _parse(it):
                     else:
                         val, _ = _parse(it)
             else:
-                pass # TODO missing the value conversion for OP.eq
+                pass  # TODO missing the value conversion for OP.eq
             if name not in data:
                 order.append(name)
             data[name] = prop(val)
@@ -154,7 +154,7 @@ def _build(name, obj, dic=None, keys=None):
         keys = dic['_keys'] = data.pop('@keys').value
         for nm, val in data.items():
             _build(nm, val, dic, keys)
-        #return {name: dic}
+            #return {name: dic}
         return make_object_from_dict(name, dic)
 
     # SUB
@@ -178,12 +178,12 @@ def _build(name, obj, dic=None, keys=None):
             for v in obj.value.values():
                 _build(name, v, dic, keys)
         else:
-            for k,v in zip(keys, obj.value):
+            for k, v in zip(keys, obj.value):
                 dic['_attr'].setdefault(k, {})[name] = v
 
     # SET
     elif obj.mode is Prop.set:
-        for k,v in obj.value.items():
+        for k, v in obj.value.items():
             dic['_attr'].setdefault(k, {})[name] = v
 
     # DEFAULT
@@ -192,7 +192,7 @@ def _build(name, obj, dic=None, keys=None):
 
     # METHOD
     elif obj.mode is Prop.method:
-        dic['_meth'][name] = lambda self=None, *args, **kw: obj.value #TODO Fix lambdas state
+        dic['_meth'][name] = lambda self=None, *args, **kw: obj.value  # TODO Fix lambdas state
 
     # ERROR!
     else:

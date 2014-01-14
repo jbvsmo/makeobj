@@ -64,8 +64,8 @@ def _fix_keys(keys, _keys, keys_type):
     error_mixed = False
     keys_names = []
     if all_tuples and all_values:
-        final_keys = [(v.value, k) for k, v in keys] + _keys +\
-                     [(v, k) for k,v in keys_type]
+        final_keys = [(v.value, k) for k, v in keys] + _keys + \
+                     [(v, k) for k, v in keys_type]
         final_keys.sort()
         keys_names = [v for k, v in final_keys]
     elif keys_type:
@@ -99,6 +99,7 @@ def _fix_attr(attr, _attr, keys):
                 out[k][name] = el
 
     return dict(out)
+
 
 def _check_bases(bases):
     """ Check for repeated names or keys on base classes.

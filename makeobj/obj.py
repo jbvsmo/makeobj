@@ -16,6 +16,7 @@ def sample_dict():
     """
     return {'_keys': [], '_attr': {}, '_attrs': {}, '_meth': {}}
 
+
 sample = sample_dict()
 
 
@@ -223,6 +224,7 @@ class __MetaObj(type):
 def _base_cmp(op):
     """ Create comparison between elements of same type or on the others mro
     """
+
     def fn(self, other):
         if isinstance(self, type(other)):
             return op(self._value, other._value)
@@ -236,6 +238,7 @@ class Obj(object):
     """ Base class without metaclass because of python 2.x/3.x
         incompatibilities. The metaclass is in the `Obj` class.
     """
+
     def __new__(cls, key):
         obj = getattr(cls, key, None)
         if obj is None:
@@ -298,6 +301,7 @@ class SubObj(object):
     """ Small Objects to be used like a dictionary but with `getattr` syntax
         instead of `getitem`.
     """
+
     def __init__(self, data=None):
         if data is not None:
             self.__dict__.update(data)

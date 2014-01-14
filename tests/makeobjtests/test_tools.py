@@ -7,11 +7,12 @@ from makeobj import tools as t
 
 __author__ = 'JB'
 
+
 class ToolsTest(unittest.TestCase):
     def test_min_max(self):
 
-        self.assertEqual(t.max([1,2,3]), 3)
-        self.assertEqual(t.min([1,2,3]), 1)
+        self.assertEqual(t.max([1, 2, 3]), 3)
+        self.assertEqual(t.min([1, 2, 3]), 1)
 
         self.assertEqual(t.max([]), None)
         self.assertEqual(t.min([]), None)

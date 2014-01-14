@@ -2,9 +2,11 @@
 import unittest
 import os
 import makeobj
+
 __author__ = 'JB'
 
 test_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def parse_file(name):
     with open(os.path.join(test_root, 'files', name + '.makeobj')) as f:

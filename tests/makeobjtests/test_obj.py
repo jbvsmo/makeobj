@@ -6,21 +6,22 @@ import makeobj.obj as o
 
 __author__ = 'JB'
 
-class ObjTest(unittest.TestCase):
 
+class ObjTest(unittest.TestCase):
     def setUp(self):
         self.x = o.make('x', ['a', 'b', 'c'])
-        self.y = o.make('y', zip([2,3,4], 'abc'))
+        self.y = o.make('y', zip([2, 3, 4], 'abc'))
         self.z = o.make(
             'z',
             {'a': {'num': 1},
              'b': {'num': 2},
              'c': {}},
             order=sorted,
-            methods=
-                {'f1': lambda self: self.name,
-                 'f2': lambda self, val: self.value + val,
-                 'f3': lambda self, *args: args},
+            methods={
+                'f1': lambda self: self.name,
+                'f2': lambda self, val: self.value + val,
+                'f3': lambda self, *args: args
+            },
             common_attr={'num': 0},
             doc='Example'
         )
@@ -101,25 +102,28 @@ class ObjTest(unittest.TestCase):
         self.assertEqual(Z.a.x, 1)
 
     def test_repeated_value(self):
-        f = lambda : o.make('test', [(0,'a'), (1, 'b'), (1, 'c')])
+        f = lambda: o.make('test', [(0, 'a'), (1, 'b'), (1, 'c')])
         self.assertRaises(RuntimeError, f)
 
     def test_iterate(self):
         class A(o.Obj):
             a, b = keys(2)
+
         class B(A):
             c, d = keys(2)
 
         self.assertEqual(list(A), [A.a, A.b])
         self.assertEqual(tuple(B), (B.a, B.b, B.c, B.d))
 
-class ObjTestComparison(unittest.TestCase):
 
+class ObjTestComparison(unittest.TestCase):
     def setUp(self):
         class A(o.Obj):
             a, b = keys(2)
+
         class B(o.Obj):
             a, b = keys(2)
+
         class C(A):
             c, d = keys(2)
 
@@ -154,14 +158,13 @@ class ObjTestComparison(unittest.TestCase):
         A, B, C = self.cls
 
         self.assertEquals(sorted([C.b, C.d, C.a, C.c]),
-                                 [C.a, C.b, C.c, C.d])
+                          [C.a, C.b, C.c, C.d])
 
         self.assertEquals(sorted([C.b, C.d, C.a, C.c], reverse=1),
-                                 [C.d, C.c, C.b, C.a])
+                          [C.d, C.c, C.b, C.a])
 
 
 class ObjTestSubclass(unittest.TestCase):
-
     def setUp(self):
         class X(o.Obj):
             a, b = keys(2)
@@ -237,12 +240,12 @@ class ObjTestSubclass(unittest.TestCase):
         X = self.cls[0]
 
         # Cannot repeat key from parent
-        self. assertRaises(RuntimeError, type, 'SubX', (X,),
-                           {'_keys': ['a', 'z']})
+        self.assertRaises(RuntimeError, type, 'SubX', (X,),
+                          {'_keys': ['a', 'z']})
 
         # Cannot repeat key from this same class
-        self. assertRaises(RuntimeError, type, 'SubX', (X,),
-                           {'_keys': ['z', 'z']})
+        self.assertRaises(RuntimeError, type, 'SubX', (X,),
+                          {'_keys': ['z', 'z']})
 
     def test_method(self):
         X, Y, Z = self.cls[:3]
@@ -256,7 +259,6 @@ class ObjTestSubclass(unittest.TestCase):
 
 
 class ObjTestMultipleSubclass(unittest.TestCase):
-
     def setUp(self):
         class A(o.Obj):
             a, b = 1, 2
@@ -305,7 +307,6 @@ class Lookup_Possible(o.Obj):
 
 
 class OtherTests(unittest.TestCase):
-
     def test_pickle(self):
         import pickle
 
@@ -320,7 +321,6 @@ class OtherTests(unittest.TestCase):
         self.assert_(X.b is _X_b)
 
     def test_isinstance(self):
-
         class C(o.Obj):
             a, b = 1, 2
 
