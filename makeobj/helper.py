@@ -9,7 +9,7 @@ ALLOWED_ENUM_TYPES = tuple(set([int, long]))
 
 
 class Modes(object):
-    """ Special Modes
+    """ Special Modes. Cannot use Obj here because it does not exist yet
     """
     attr = 1
     common_attr = 2
@@ -24,6 +24,13 @@ class Special(object):
     def __init__(self, mode, **kw):
         self.mode = mode
         self.__dict__.update(kw)
+
+    def __iter__(self):
+        """ Iteration for cases like
+            a = keys()
+            a, = keys()
+        """
+        return iter([self])
 
 
 def attr(*args, **kw):
@@ -45,12 +52,15 @@ def attr(*args, **kw):
     return Special(Modes.common_attr, default=default, elements=kw)
 
 
-def keys(num, function=None):
+def keys(num=1, function=None):
     """ Return many keys to be unpacked into variables. They may have a
         function as value generator and a start value.
             a, b = keys(2)
             a, b, c = keys(3, lambda x: x**2)
     """
+    if num < 1:
+        raise ValueError('Cannot create %s keys. At least 1 is needed' % num)
+
     if function is not None:
         val = [Special(Modes.keys, value=function(k))
                for k in range(num)]
