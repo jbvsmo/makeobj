@@ -15,6 +15,10 @@ def fix_dict(dic):
     _keys = list(dic.pop('_keys', []))
     _attr = dic.pop('_attr', {})
 
+    # Python 3.13 added a numeric value that gets confused with a keys_type.
+    # TODO remove all dunder attributes that are not used by us.
+    dic.pop('__firstlineno__', None)
+
     special = [(k, v) for k, v in dic.items() if isinstance(v, Special)]
     for k, v in special:
         dic.pop(k)
