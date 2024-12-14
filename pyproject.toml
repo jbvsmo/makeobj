@@ -1,0 +1,30 @@
+[project]
+name = "makeobj"
+version = "0.8"
+description = "Powerful Enumeration System"
+readme = "README.md"
+license = "BSD-3-Clause"
+authors = [
+    { name = "João Bernardo Oliveira", email = "jbvsmo@gmail.com" }
+]
+requires-python = ">=2.6"
+dependencies = []
+keywords = ['enum', 'enumeration', 'Enum Language']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Topic :: Software Development :: Code Generators',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Software Development :: Libraries :: Application Frameworks',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
