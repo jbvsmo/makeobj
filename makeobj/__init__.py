@@ -15,7 +15,7 @@ __all__ = ('parse', 'ParseError',
            'make', 'Obj', 'no_conflict',
            'attr', 'class_attr', 'keys',)
 
-version = '0.8'
+version = '0.9'
 
 
 if __name__ == '__main__':

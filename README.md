@@ -2,7 +2,7 @@ MakeObj - Powerful Enumeration System
 =====================================
 
 * Author:    João Bernardo Oliveira ([@jbvsmo](http://twitter.com/jbvsmo))
-* Version:   0.8
+* Version:   0.9
 * GitHub:    <https://github.com/jbvsmo/makeobj>
 * Wiki:      <https://github.com/jbvsmo/makeobj/wiki>
 
