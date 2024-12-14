@@ -132,10 +132,10 @@ class ObjTestComparison(unittest.TestCase):
     def test_lt_le_gt_ge(self):
         A, B, C = self.cls
 
-        self.assert_(A.a < C.c)
-        self.assert_(C.c > A.a)
-        self.assert_(A.b <= C.d)
-        self.assert_(C.d >= A.b)
+        self.assertTrue(A.a < C.c)
+        self.assertTrue(C.c > A.a)
+        self.assertTrue(A.b <= C.d)
+        self.assertTrue(C.d >= A.b)
         self.assertRaises(TypeError, lambda: A.a < B.b)
         self.assertRaises(TypeError, lambda: A.a > B.b)
         self.assertRaises(TypeError, lambda: B.a <= A.b)
@@ -157,10 +157,10 @@ class ObjTestComparison(unittest.TestCase):
     def test_sort(self):
         A, B, C = self.cls
 
-        self.assertEquals(sorted([C.b, C.d, C.a, C.c]),
+        self.assertEqual(sorted([C.b, C.d, C.a, C.c]),
                           [C.a, C.b, C.c, C.d])
 
-        self.assertEquals(sorted([C.b, C.d, C.a, C.c], reverse=1),
+        self.assertEqual(sorted([C.b, C.d, C.a, C.c], reverse=1),
                           [C.d, C.c, C.b, C.a])
 
 
@@ -318,7 +318,7 @@ class OtherTests(unittest.TestCase):
 
         self.assertEqual(X, _X)
         self.assertEqual(X.a, _X_a)
-        self.assert_(X.b is _X_b)
+        self.assertTrue(X.b is _X_b)
 
     def test_isinstance(self):
         class C(o.Obj):
@@ -327,9 +327,9 @@ class OtherTests(unittest.TestCase):
         class D(C):
             c, d = keys(2)
 
-        self.assert_(isinstance(C.a, D))
-        self.assert_(isinstance(C.b, D))
-        self.assert_(isinstance(D.a, C))
-        self.assert_(isinstance(D.b, C))
-        self.assert_(isinstance(D.c, C))
-        self.assert_(isinstance(D.d, C))
+        self.assertTrue(isinstance(C.a, D))
+        self.assertTrue(isinstance(C.b, D))
+        self.assertTrue(isinstance(D.a, C))
+        self.assertTrue(isinstance(D.b, C))
+        self.assertTrue(isinstance(D.c, C))
+        self.assertTrue(isinstance(D.d, C))

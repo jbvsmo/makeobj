@@ -23,6 +23,10 @@ if not v2:
     if not hasattr(builtins, 'callable'):
         def callable(object):
             return isinstance(object, _collections.Callable)
+
+    if not hasattr(_collections, 'Mapping'):
+        import collections.abc as _abc
+        _collections.Mapping = _abc.Mapping
 else:
     zip = _it.izip
     map = _it.imap
